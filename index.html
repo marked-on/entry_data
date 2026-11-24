@@ -662,21 +662,36 @@
                     </div>
                     <input type="url" id="driveWebhookUrlInput" placeholder="https://script.google.com/macros/s/.../exec"
                            class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-mono">
+                    <div class="mt-2">
+                        <label class="block text-[11px] font-bold text-slate-700 mb-1">Token / Secret GAS</label>
+                        <input type="text" id="driveTokenInput" value="923016" placeholder="923016"
+                               class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-mono font-bold">
+                    </div>
                     <div id="appsScriptGuideBox" class="hidden mt-2 p-2.5 rounded-xl bg-slate-900 text-slate-100 text-[10px] space-y-1.5">
                         <p class="text-slate-300">1. Buka <strong>script.google.com</strong> → Buat Project Baru → Tempel kode di bawah → <strong>Deploy as Web App (Anyone)</strong>:</p>
-                        <pre id="appsScriptCodeSample" class="overflow-x-auto font-mono text-[9px] text-emerald-300 bg-slate-950 p-2 rounded-lg">function doPost(e) {
-  var data = JSON.parse(e.postData.contents);
-  var folderName = "Receiving_" + (data.kd_store || "STORE") + "_" + (data.tanggal || "LOG");
-  var folders = DriveApp.getFoldersByName(folderName);
-  var folder = folders.hasNext() ? folders.next() : DriveApp.createFolder(folderName);
-  var bytes = Utilities.base64Decode(data.base64Data);
-  var blob = Utilities.newBlob(bytes, data.mimeType, data.fileName);
-  var file = folder.createFile(blob);
+                        <pre id="appsScriptCodeSample" class="overflow-x-auto font-mono text-[9px] text-emerald-300 bg-slate-950 p-2 rounded-lg">const SECRET = '923016';
+const FOLDER = 'data_AM024';
+
+function doPost(e) {
+  var body = e.postData ? JSON.parse(e.postData.contents) : {};
+  var p = Object.assign({}, e.parameter || {}, body);
+  if (p.token !== SECRET) {
+    return ContentService.createTextOutput(JSON.stringify({ ok: false, error: 'unauthorized' })).setMimeType(ContentService.MimeType.JSON);
+  }
+  var rootIt = DriveApp.getFoldersByName(FOLDER);
+  var root = rootIt.hasNext() ? rootIt.next() : DriveApp.createFolder(FOLDER);
+  var subName = 'Bukti_' + (p.tanggal || 'LOG') + '_' + (p.no_lpb || 'LPB');
+  var subIt = root.getFoldersByName(subName);
+  var sub = subIt.hasNext() ? subIt.next() : root.createFolder(subName);
+  var bytes = Utilities.base64Decode(p.base64Data);
+  var blob = Utilities.newBlob(bytes, p.mimeType, p.fileName);
+  var file = sub.createFile(blob);
   file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
   return ContentService.createTextOutput(JSON.stringify({
-    status: "ok",
+    ok: true,
+    status: 'ok',
     fileUrl: file.getUrl(),
-    folderUrl: folder.getUrl()
+    folderUrl: sub.getUrl()
   })).setMimeType(ContentService.MimeType.JSON);
 }</pre>
                         <button type="button" onclick="copyAppsScriptCode()" class="px-2.5 py-1 rounded bg-indigo-600 text-white font-bold">
@@ -708,103 +723,105 @@
 
             <div class="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
                 <button id="resetSessionBtn" type="button"
-                        class="px-3.5 py-2 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold transition-all">
-                    Reset Qty Sesi
-                </button>
-                <button type="button" onclick="closeModal('settingsModal')"
-                        class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-all">
-                    Tutup
-                </button>
-            </div>
+                    class="px-3.5 py-2 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold transition-all">
+                Reset Qty Sesi
+            </button>
+            <button type="button" onclick="closeModal('settingsModal')"
+                    class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-all">
+                Tutup
+            </button>
         </div>
     </div>
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+</div>
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'smart-receiving-validator';
-        let cloudDb = null;
-        let cloudAuth = null;
-        let cloudUser = null;
-        let unsubscribeSharedSession = null;
-        let isApplyingRemoteSnapshot = false;
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'smart-receiving-validator';
+    let cloudDb = null;
+    let cloudAuth = null;
+    let cloudUser = null;
+    let unsubscribeSharedSession = null;
+    let isApplyingRemoteSnapshot = false;
 
-        window.realtimeSyncEngine = {
-            async initCloudSync(sessionCode, onRemoteUpdate) {
-                try {
-                    if (typeof __firebase_config === 'undefined' || !__firebase_config) {
-                        return false;
-                    }
-                    const cfg = JSON.parse(__firebase_config);
-                    const app = initializeApp(cfg);
-                    cloudAuth = getAuth(app);
-                    cloudDb = getFirestore(app);
-
-                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        await signInWithCustomToken(cloudAuth, __initial_auth_token);
-                    } else {
-                        await signInAnonymously(cloudAuth);
-                    }
-                    cloudUser = cloudAuth.currentUser;
-                    if (!cloudUser) return false;
-
-                    window.realtimeSyncEngine.subscribeSession(sessionCode, onRemoteUpdate);
-                    return true;
-                } catch (err) {
-                    console.warn('Cloud real-time sync fallback ke lokal/IDB:', err);
+    window.realtimeSyncEngine = {
+        async initCloudSync(sessionCode, onRemoteUpdate) {
+            try {
+                if (typeof __firebase_config === 'undefined' || !__firebase_config) {
                     return false;
                 }
-            },
+                const cfg = JSON.parse(__firebase_config);
+                const app = initializeApp(cfg);
+                cloudAuth = getAuth(app);
+                cloudDb = getFirestore(app);
 
-            subscribeSession(sessionCode, onRemoteUpdate) {
-                if (!cloudDb || !cloudUser) return;
-                if (typeof unsubscribeSharedSession === 'function') {
-                    unsubscribeSharedSession();
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(cloudAuth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(cloudAuth);
                 }
+                cloudUser = cloudAuth.currentUser;
+                if (!cloudUser) return false;
+
+                window.realtimeSyncEngine.subscribeSession(sessionCode, onRemoteUpdate);
+                return true;
+            } catch (err) {
+                console.warn('Cloud real-time sync fallback ke lokal/IDB:', err);
+                return false;
+            }
+        },
+
+        subscribeSession(sessionCode, onRemoteUpdate) {
+            if (!cloudDb || !cloudUser) return;
+            if (typeof unsubscribeSharedSession === 'function') {
+                unsubscribeSharedSession();
+            }
+            const cleanCode = String(sessionCode || 'AM024-LPB').trim().replace(/[^a-zA-Z0-9_-]/g, '_');
+            const docRef = doc(cloudDb, 'artifacts', appId, 'public', 'data', 'receiving_sessions', cleanCode);
+
+            unsubscribeSharedSession = onSnapshot(docRef, (snap) => {
+                if (!snap.exists()) return;
+                const data = snap.data();
+                if (!data || data.lastUpdatedByDevice === window.getDeviceId()) return;
+
+                isApplyingRemoteSnapshot = true;
+                try {
+                    onRemoteUpdate(data);
+                } finally {
+                    setTimeout(() => { isApplyingRemoteSnapshot = false; }, 120);
+                }
+            }, (err) => {
+                console.warn('onSnapshot error:', err);
+            });
+        },
+
+        async pushSessionState(sessionCode, payload) {
+            if (isApplyingRemoteSnapshot || !cloudDb || !cloudUser) return;
+            try {
                 const cleanCode = String(sessionCode || 'AM024-LPB').trim().replace(/[^a-zA-Z0-9_-]/g, '_');
                 const docRef = doc(cloudDb, 'artifacts', appId, 'public', 'data', 'receiving_sessions', cleanCode);
-
-                unsubscribeSharedSession = onSnapshot(docRef, (snap) => {
-                    if (!snap.exists()) return;
-                    const data = snap.data();
-                    if (!data || data.lastUpdatedByDevice === window.getDeviceId()) return;
-
-                    isApplyingRemoteSnapshot = true;
-                    try {
-                        onRemoteUpdate(data);
-                    } finally {
-                        setTimeout(() => { isApplyingRemoteSnapshot = false; }, 120);
-                    }
-                }, (err) => {
-                    console.warn('onSnapshot error:', err);
-                });
-            },
-
-            async pushSessionState(sessionCode, payload) {
-                if (isApplyingRemoteSnapshot || !cloudDb || !cloudUser) return;
-                try {
-                    const cleanCode = String(sessionCode || 'AM024-LPB').trim().replace(/[^a-zA-Z0-9_-]/g, '_');
-                    const docRef = doc(cloudDb, 'artifacts', appId, 'public', 'data', 'receiving_sessions', cleanCode);
-                    await setDoc(docRef, {
-                        ...payload,
-                        lastUpdatedByDevice: window.getDeviceId(),
-                        lastUpdatedByOperator: window.getCurrentOperatorName(),
-                        serverSyncedAt: Date.now()
-                    }, { merge: true });
-                } catch (err) {
-                    console.warn('Gagal push state real-time:', err);
-                }
+                await setDoc(docRef, {
+                    ...payload,
+                    lastUpdatedByDevice: window.getDeviceId(),
+                    lastUpdatedByOperator: window.getCurrentOperatorName(),
+                    serverSyncedAt: Date.now()
+                }, { merge: true });
+            } catch (err) {
+                console.warn('Gagal push state real-time:', err);
             }
-        };
-    </script>
-
-    <script>
-        // =========================================================================
-        // 1. KONSTANTA URL GITHUB, DATA CADANGAN & LOGIKA VALIDASI
-        // =========================================================================
-        const DEFAULT_MASTER_URL = 'https://github.com/marked-on/entry_data/blob/main/master.json';
+        }
+    };
+</script>
+<script>
+    // =========================================================================
+    // 1. KONSTANTA URL GITHUB, WEBHOOK GAS & DATA CADANGAN
+    // =========================================================================
+    const DEFAULT_MASTER_URL = 'https://github.com/marked-on/entry_data/blob/main/master.json';
         const DEFAULT_RECEIVED_URL = 'https://github.com/marked-on/entry_data/blob/main/received.json';
+        // DROP AND DOWN URL WEBHOOK GAS (/exec) 
+        const DEFAULT_DRIVE_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbyobh7viPI6FOQ61VOLde4pX4S8gMdnToWnx1TXL5Ge-kI92u1-ERbHTDztWwR1bHIQ/exec';
+        const DEFAULT_DRIVE_SECRET_TOKEN = '923016';
 
         const FALLBACK_MASTER = [
             { kd_store: "AM024", plu: "3022032", descp: "BENFARM FRANKFURTER CHICKEN SAUSAGE 300GR_1C8P", barcode: "8991649000662", isi1: "1", isi2: "8", sat1: "PCS", sat2: "CRT", lokasi: "" },
@@ -962,7 +979,8 @@
             evidences: [],
             activeEvidenceTargetUid: 'SESSION_GENERAL',
             hqEmail: '',
-            driveWebhookUrl: '',
+            driveWebhookUrl: DEFAULT_DRIVE_WEBHOOK_URL,
+            driveSecretToken: DEFAULT_DRIVE_SECRET_TOKEN,
             isAuditFinished: false,
             filterStatus: 'all',
             lastScannedId: null,
@@ -1830,6 +1848,8 @@
             try {
                 const firstRec = state.receivingItems[0] || {};
                 const payload = {
+                    token: (state.driveSecretToken || '923016').trim(),
+                    action: 'upload_media',
                     kd_store: firstRec.kd_store || 'AM024',
                     no_lpb: firstRec.no_lpb || 'LPB',
                     tanggal: getTodayDateKey(),
@@ -1847,7 +1867,7 @@
                     body: JSON.stringify(payload)
                 });
                 const json = await res.json();
-                if (json && json.status === 'ok' && json.fileUrl) {
+                if (json && (json.ok === true || json.status === 'ok') && json.fileUrl) {
                     record.driveUrl = json.fileUrl;
                     record.driveFolderUrl = json.folderUrl || '';
                     record.syncedToDrive = true;
@@ -2638,10 +2658,22 @@
                 </div>
 
                 <div class="flex items-center gap-1.5">
-                    <button type="button" onclick="adjustItemQty('${item.uid}', -1)"
-                            class="w-8 h-8 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 font-bold active:scale-95">
-                        <i class="fas fa-minus text-[10px]"></i>
-                    </button>
+                <button type="button" onclick="adjustItemQty('${item.uid}', -1)"
+                        class="w-8 h-8 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 font-bold active:scale-95">
+                    <i class="fas fa-minus text-[10px]"></i>
+                </button>
+                <input type="text" inputmode="numeric" pattern="[0-9]*"
+                       value="${Number(item.qty_fisik) || 0}"
+                       data-prev-qty="${Number(item.qty_fisik) || 0}"
+                       onfocus="this.dataset.prevQty=this.value; this.select();"
+                       oninput="this.value=this.value.replace(/[^0-9]/g,''); handleLiveManualQtyInput('${item.uid}', this.value, this)"
+                       onblur="finalizeManualQtyEdit('${item.uid}', this)"
+                       onkeydown="if(event.key==='Enter'){ event.preventDefault(); this.blur(); }"
+                       class="w-14 h-8 text-center rounded-lg border border-slate-300 bg-white font-mono text-xs sm:text-sm font-extrabold ${st.qtyColor} focus:outline-none focus:ring-2 focus:ring-indigo-500/25">
+                <button type="button" onclick="adjustItemQty('${item.uid}', 1)"
+                        class="w-8 h-8 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-bold active:scale-95">
+                    <i class="fas fa-plus text-[10px]"></i>
+                </button>
                     <input type="number" min="0" inputmode="numeric"
                            value="${item.qty_fisik}"
                            data-prev-qty="${item.qty_fisik}"
@@ -2680,6 +2712,7 @@
                 receivedUrl: state.receivedUrl,
                 hqEmail: state.hqEmail,
                 driveWebhookUrl: state.driveWebhookUrl,
+                driveSecretToken: state.driveSecretToken,
                 updatedAt: Date.now()
             };
             await idbSet('receivingSession', payload);
@@ -2807,7 +2840,8 @@
                 state.masterUrl = savedSession.masterUrl || DEFAULT_MASTER_URL;
                 state.receivedUrl = savedSession.receivedUrl || DEFAULT_RECEIVED_URL;
                 state.hqEmail = savedSession.hqEmail || '';
-                state.driveWebhookUrl = savedSession.driveWebhookUrl || '';
+                state.driveWebhookUrl = savedSession.driveWebhookUrl || DEFAULT_DRIVE_WEBHOOK_URL;
+                state.driveSecretToken = savedSession.driveSecretToken || DEFAULT_DRIVE_SECRET_TOKEN;
                 renderAll();
                 if (navigator.onLine) syncFromGithub(true);
             } else {
@@ -3019,10 +3053,12 @@
                     const rInp = document.getElementById('receivedUrlInput');
                     const emailInp = document.getElementById('hqEmailInput');
                     const driveInp = document.getElementById('driveWebhookUrlInput');
+                    const tokenInp = document.getElementById('driveTokenInput');
                     if (mInp) mInp.value = state.masterUrl || DEFAULT_MASTER_URL;
                     if (rInp) rInp.value = state.receivedUrl || DEFAULT_RECEIVED_URL;
                     if (emailInp) emailInp.value = state.hqEmail || '';
                     if (driveInp) driveInp.value = state.driveWebhookUrl || '';
+                    if (tokenInp) tokenInp.value = state.driveSecretToken || '923016';
                     openModal('settingsModal');
                 });
             }
@@ -3037,10 +3073,12 @@
                     const rInp = document.getElementById('receivedUrlInput');
                     const emailInp = document.getElementById('hqEmailInput');
                     const driveInp = document.getElementById('driveWebhookUrlInput');
+                    const tokenInp = document.getElementById('driveTokenInput');
                     state.masterUrl = (mInp && mInp.value.trim()) || DEFAULT_MASTER_URL;
                     state.receivedUrl = (rInp && rInp.value.trim()) || DEFAULT_RECEIVED_URL;
                     state.hqEmail = (emailInp && emailInp.value.trim()) || '';
                     state.driveWebhookUrl = (driveInp && driveInp.value.trim()) || '';
+                    state.driveSecretToken = (tokenInp && tokenInp.value.trim()) || '923016';
                     await saveSessionToIDB();
                     closeModal('settingsModal');
                     await syncFromGithub(false);
