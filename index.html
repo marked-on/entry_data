@@ -3,24 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Smart Receiving & Barcode Validator</title>
+    <title>Smart Receiving & Barcode Validator — Audit Penerimaan Barang</title>
 
     <!-- Google Fonts: Inter & JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
-
-    <!-- Font Awesome 6 (untuk ikon social footer & UI) -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
+    <!-- Font Awesome 6 untuk ikon aplikasi & social footer -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
     <!-- HTML5-QRCode untuk Scanner Kamera Resolusi Tinggi -->
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
-    <!-- SheetJS (xlsx) untuk Export ke Excel (.xlsx) & CSV -->
-    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+    <!-- SheetJS (XLSX) untuk Export Excel (.xlsx) dan CSV -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 
     <script>
         tailwind.config = {
@@ -36,47 +36,35 @@
     </script>
 
     <style>
-        body {
-            background-color: #f8fafc;
-            color: #0f172a;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        /* Styling khusus area video scanner agar tajam dan proporsional */
+        /* Styling kamera scanner agar tajam dan proporsional di layar HP */
         #reader {
-            width: 100% !important;
-            border: none !important;
+            width: 100%;
             border-radius: 1rem;
             overflow: hidden;
             background: #0f172a;
         }
         #reader video {
-            object-fit: cover !important;
             width: 100% !important;
-            height: 260px !important;
+            height: auto !important;
+            object-fit: cover !important;
             border-radius: 1rem;
         }
-        #reader__dashboard_section_csr span,
-        #reader__dashboard_section_swaplink {
-            display: none !important;
-        }
 
-        /* Animasi flash lembut saat item ter-scan */
-        @keyframes scanPulse {
-            0% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.45); }
-            70% { box-shadow: 0 0 0 12px rgba(79, 70, 229, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0); }
+        /* Animasi highlight saat item baru selesai di-scan */
+        @keyframes pulseHighlight {
+            0% { transform: scale(1.015); box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.25); }
+            100% { transform: scale(1); box-shadow: none; }
         }
         .scan-highlight {
-            animation: scanPulse 0.8s ease-out;
+            animation: pulseHighlight 0.6s ease-out;
         }
 
-        /* Social Footer Styling */
+        /* Styling khusus Social Footer sesuai permintaan */
         .social-footer-container {
-            margin-top: 2.5rem;
-            padding: 1.75rem 1rem 2rem;
             background: #ffffff;
             border-top: 1px solid #e2e8f0;
+            padding: 1.75rem 1rem 2rem;
+            margin-top: auto;
             text-align: center;
         }
         .social-footer-bar {
@@ -89,8 +77,8 @@
         }
         .social-icon {
             position: relative;
-            width: 40px;
-            height: 40px;
+            width: 2.5rem;
+            height: 2.5rem;
             border-radius: 9999px;
             display: inline-flex;
             align-items: center;
@@ -98,27 +86,27 @@
             color: #ffffff;
             font-size: 1rem;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
-            box-shadow: 0 2px 6px rgba(15, 23, 42, 0.12);
+            text-decoration: none;
         }
         .social-icon:hover {
             transform: translateY(-3px);
-            box-shadow: 0 6px 14px rgba(15, 23, 42, 0.18);
+            box-shadow: 0 6px 14px rgba(15, 23, 42, 0.16);
         }
         .social-icon .tooltip {
             position: absolute;
-            bottom: 120%;
+            bottom: 125%;
             left: 50%;
             transform: translateX(-50%);
-            background: #1e293b;
-            color: #fff;
+            background: #0f172a;
+            color: #ffffff;
             font-size: 0.7rem;
-            font-weight: 500;
-            padding: 0.2rem 0.5rem;
+            font-weight: 600;
+            padding: 0.25rem 0.55rem;
             border-radius: 0.375rem;
             white-space: nowrap;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.18s ease;
+            transition: opacity 0.2s ease;
         }
         .social-icon:hover .tooltip {
             opacity: 1;
@@ -128,208 +116,204 @@
         .social-icon.instagram { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); }
         .social-icon.whatsapp { background: #25d366; }
         .social-icon.shopee { background: #ee4d2d; }
-        .social-icon.tiktok { background: #111827; }
+        .social-icon.tiktok { background: #0f172a; }
+
         .footer-credits {
-            font-size: 0.8rem;
-            color: #475569;
+            font-size: 0.78rem;
+            color: #64748b;
             line-height: 1.5;
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="bg-slate-100 text-slate-800 antialiased min-h-screen flex flex-col selection:bg-indigo-100 selection:text-indigo-900">
 
-    <!-- Top Header Bar -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
-        <div class="max-w-4xl mx-auto px-3 sm:px-5 h-16 flex items-center justify-between gap-2">
-            <!-- Kiri Atas: Upload Logo Toko + Judul Aplikasi -->
+    <!-- Top App Bar dengan Upload Logo Toko di Kiri Atas -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-2xs">
+        <div class="max-w-3xl mx-auto px-3 sm:px-5 h-16 flex items-center justify-between gap-2">
+            <!-- Kiri Atas: Slot Upload Logo Toko + Judul -->
             <div class="flex items-center gap-2.5 min-w-0">
-                <div id="logoBox" onclick="document.getElementById('logoInput').click()" title="Klik untuk unggah logo toko"
-                     class="w-11 h-11 rounded-xl border-2 border-dashed border-indigo-300 bg-indigo-50/70 hover:bg-indigo-100/80 flex flex-col items-center justify-center cursor-pointer overflow-hidden shrink-0 transition-all group relative">
-                    <img id="storeLogoImg" src="" alt="Logo Toko" class="hidden w-full h-full object-contain p-0.5 bg-white">
-                    <div id="logoPlaceholder" class="flex flex-col items-center justify-center text-indigo-600">
-                        <i class="fas fa-camera text-xs"></i>
-                        <span class="text-[9px] font-bold tracking-tight mt-0.5">LOGO</span>
+                <label for="logoInput" title="Klik untuk upload/ganti logo toko"
+                       class="relative w-11 h-11 rounded-xl border-2 border-dashed border-slate-300 hover:border-indigo-500 bg-slate-50 flex items-center justify-center cursor-pointer overflow-hidden shrink-0 group transition-all">
+                    <input type="file" id="logoInput" accept="image/*" class="hidden">
+                    <img id="storeLogoImg" src="" alt="Logo Toko" class="hidden w-full h-full object-contain p-0.5">
+                    <div id="logoPlaceholder" class="flex flex-col items-center justify-center text-slate-400 group-hover:text-indigo-600 text-center px-0.5">
+                        <i class="fas fa-store text-xs"></i>
+                        <span class="text-[8px] font-bold leading-tight mt-0.5">LOGO</span>
                     </div>
-                </div>
-                <input type="file" id="logoInput" accept="image/*" class="hidden">
+                </label>
 
                 <div class="min-w-0">
                     <div class="flex items-center gap-1.5">
-                        <h1 class="text-sm sm:text-base font-extrabold text-slate-900 truncate">Receiving Validator</h1>
-                        <span id="storeCodeBadge" class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 font-mono text-[10px] font-bold border border-slate-200">AM024</span>
+                        <h1 class="text-sm sm:text-base font-extrabold text-slate-900 truncate tracking-tight">Receiving Validator</h1>
+                        <span id="storeCodeBadge" class="px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200 font-mono text-[10px] font-bold shrink-0">AM024</span>
                     </div>
-                    <p id="lpbSubheader" class="text-[11px] text-slate-500 truncate">Memuat data LPB...</p>
+                    <p id="lpbSubheader" class="text-[11px] text-slate-500 truncate">Memuat data penerimaan...</p>
                 </div>
             </div>
 
-            <!-- Kanan Atas: Status Koneksi, Sync GitHub & Export Multi-Format -->
+            <!-- Kanan Atas: Status Koneksi, Sync GitHub, Export & Settings -->
             <div class="flex items-center gap-1.5 shrink-0">
-                <!-- Indikator Online/Offline -->
                 <span id="networkBadge" class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                     <span class="hidden sm:inline">Online</span>
                 </span>
 
-                <!-- Tombol Sync GitHub -->
                 <button id="syncGithubBtn" type="button" title="Sinkronkan ulang dari GitHub"
-                        class="p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold transition-all active:scale-95">
-                    <i id="syncIcon" class="fas fa-sync-alt text-indigo-600"></i>
+                        class="p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs transition-all active:scale-95">
+                    <i id="syncIcon" class="fas fa-sync-alt"></i>
                 </button>
 
-                <!-- Tombol Pengaturan Link GitHub -->
-                <button id="openSettingsBtn" type="button" title="Pengaturan URL GitHub & Import Manual"
-                        class="p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold transition-all active:scale-95">
-                    <i class="fas fa-cog text-slate-600"></i>
-                </button>
-
-                <!-- Tombol Buka Menu Export Multi-Format (XLSX, CSV, JSON) -->
-                <button id="openExportModalBtn" type="button"
-                        class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm transition-all active:scale-95">
+                <button id="openExportModalBtn" type="button" title="Export Laporan Excel, CSV & JSON"
+                        class="inline-flex items-center gap-1.5 px-2.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-2xs transition-all active:scale-95">
                     <i class="fas fa-file-export"></i>
-                    <span>Export</span>
+                    <span class="hidden sm:inline">Export</span>
+                </button>
+
+                <button id="openSettingsBtn" type="button" title="Pengaturan Link GitHub & Import JSON"
+                        class="p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs transition-all active:scale-95">
+                    <i class="fas fa-cog"></i>
                 </button>
             </div>
         </div>
     </header>
 
     <!-- Toast Notification -->
-    <div id="toastBanner" class="fixed top-18 left-1/2 -translate-x-1/2 z-50 hidden max-w-md w-[92%] rounded-2xl px-4 py-3 shadow-lg border text-xs font-semibold flex items-center justify-between gap-3 transition-all">
+    <div id="toastBanner" class="hidden fixed top-18 left-1/2 -translate-x-1/2 z-50 max-w-md w-[92%] rounded-2xl px-4 py-3 shadow-lg border text-xs font-semibold flex items-center justify-between gap-3 transition-all">
         <div class="flex items-center gap-2.5">
             <i id="toastIcon" class="fas fa-info-circle text-base"></i>
             <span id="toastText">Notifikasi</span>
         </div>
-        <button onclick="hideToast()" class="opacity-70 hover:opacity-100 p-1"><i class="fas fa-times"></i></button>
+        <button type="button" onclick="hideToast()" class="opacity-75 hover:opacity-100">
+            <i class="fas fa-times"></i>
+        </button>
     </div>
 
-    <!-- Main Workspace -->
-    <main class="flex-grow max-w-4xl w-full mx-auto px-3 sm:px-5 pt-4 space-y-4">
+    <!-- Main Container -->
+    <main class="flex-grow max-w-3xl w-full mx-auto px-3 sm:px-5 py-4 space-y-4">
 
-        <!-- BAGIAN ATAS: SCANNER BARCODE KAMERA & INPUT PEMINDAI KASIR -->
-        <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-3.5 sm:p-4 space-y-3">
+        <!-- ======================================================================= -->
+        <!-- BAGIAN 1: SCANNER BARCODE (DI SEBELAH ATAS APLIKASI)                    -->
+        <!-- ======================================================================= -->
+        <section class="bg-white rounded-2xl border border-slate-200 shadow-xs p-4 space-y-3">
             <div class="flex items-center justify-between gap-2">
                 <div class="flex items-center gap-2">
-                    <span class="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center text-xs">
-                        <i class="fas fa-barcode"></i>
-                    </span>
+                    <div class="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-2xs">
+                        <i class="fas fa-barcode text-sm"></i>
+                    </div>
                     <div>
-                        <h2 class="text-xs sm:text-sm font-bold text-slate-900">Scanner Barcode Penerimaan</h2>
-                        <p class="text-[11px] text-slate-500">Kamera HD Autofocus atau Alat Pindai Kasir (USB/BT)</p>
+                        <h2 class="text-xs sm:text-sm font-bold text-slate-900">Scanner Penerimaan Barang</h2>
+                        <p class="text-[11px] text-slate-500">Gunakan kamera HP atau tembak scanner kasir</p>
                     </div>
                 </div>
 
-                <!-- Kontrol Kamera: Start/Stop, Senter, Switch Kamera -->
                 <div class="flex items-center gap-1.5">
                     <button id="toggleTorchBtn" type="button" title="Nyalakan/Matikan Senter"
-                            class="hidden px-2.5 py-1.5 rounded-xl border border-amber-200 bg-amber-50 text-amber-700 text-xs font-semibold transition-all">
-                        <i class="fas fa-bolt"></i>
+                            class="hidden px-2.5 py-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-amber-50 text-slate-700 text-xs font-semibold transition-all">
+                        <i class="fas fa-bolt text-amber-500"></i>
                     </button>
-                    <button id="switchCameraBtn" type="button" title="Ganti Kamera Depan/Belakang"
-                            class="hidden px-2.5 py-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-semibold transition-all">
+                    <button id="switchCameraBtn" type="button" title="Ganti Kamera"
+                            class="hidden px-2.5 py-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-semibold transition-all">
                         <i class="fas fa-camera-rotate"></i>
                     </button>
                     <button id="toggleCameraBtn" type="button"
-                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-xs transition-all active:scale-95">
+                            class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-2xs transition-all active:scale-95">
                         <i id="cameraBtnIcon" class="fas fa-video"></i>
                         <span id="cameraBtnText">Buka Kamera</span>
                     </button>
                 </div>
             </div>
 
-            <!-- Viewport Kamera -->
-            <div id="cameraWrapper" class="hidden relative rounded-2xl overflow-hidden bg-slate-900 border border-slate-800">
+            <!-- Viewport Kamera HD (Tersembunyi hingga tombol Buka Kamera ditekan) -->
+            <div id="cameraWrapper" class="hidden relative">
                 <div id="reader"></div>
-                <div class="absolute bottom-2.5 left-1/2 -translate-x-1/2 bg-black/65 backdrop-blur-xs text-white text-[11px] px-3 py-1 rounded-full pointer-events-none flex items-center gap-1.5">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                    <span>Arahkan barcode ke kotak bidik</span>
-                </div>
+                <p class="text-[11px] text-center text-slate-500 mt-1.5">
+                    Arahkan garis merah/kotak bidik ke barcode kemasan (HD Autofocus aktif)
+                </p>
             </div>
 
-            <!-- Input Pindai Cepat (Hardware Scanner / Ketik Barcode / PLU / Nama) -->
-            <form id="manualScanForm" class="flex gap-2">
+            <!-- Input Barcode Cepat (Mendukung USB/Bluetooth Scanner & Ketik Manual) -->
+            <form id="manualScanForm" class="flex items-center gap-2">
                 <div class="relative flex-1">
-                    <i class="fas fa-qrcode absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                    <i class="fas fa-qrcode text-slate-400 text-xs absolute left-3.5 top-1/2 -translate-y-1/2"></i>
                     <input type="text" id="barcodeInput" autocomplete="off"
-                           placeholder="Scan barcode alat kasir / ketik Barcode atau PLU..."
-                           class="w-full pl-10 pr-9 py-2.5 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white text-xs sm:text-sm font-mono font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/25 focus:border-indigo-500 transition-all">
-                    <button type="button" id="clearInputBtn" onclick="document.getElementById('barcodeInput').value=''; document.getElementById('barcodeInput').focus();"
-                            class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1">
-                        <i class="fas fa-times-circle text-xs"></i>
-                    </button>
+                           placeholder="Scan barcode / ketik PLU lalu tekan Enter..."
+                           class="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white text-xs sm:text-sm font-mono font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/25 focus:border-indigo-500 transition-all">
                 </div>
                 <button type="submit"
-                        class="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shrink-0 transition-all active:scale-95">
-                    <i class="fas fa-plus mr-1"></i>Scan
+                        class="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-all active:scale-95 shrink-0">
+                    Cek
                 </button>
             </form>
 
-            <!-- Kartu Hasil Scan Terakhir (Feedback Instan) -->
+            <!-- Kartu Hasil Scan Terakhir -->
             <div id="lastScannedCard" class="hidden rounded-xl p-3 border transition-all">
                 <div class="flex items-start justify-between gap-2">
-                    <div class="min-w-0">
-                        <div class="flex items-center gap-2 flex-wrap">
-                            <span id="lastScanBadge" class="px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wide">STATUS</span>
-                            <span id="lastScanCode" class="font-mono text-[11px] text-slate-600">PLU / Barcode</span>
+                    <div class="min-w-0 flex-1">
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <span id="lastScanBadge" class="px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase border">Status</span>
+                            <span id="lastScanCode" class="font-mono text-[11px] text-slate-600"></span>
                         </div>
-                        <p id="lastScanName" class="text-xs sm:text-sm font-bold text-slate-900 mt-1 truncate">Nama Barang</p>
-                        <p id="lastScanDetail" class="text-[11px] text-slate-600 mt-0.5">Qty Fisik: 0 / LPB: 0</p>
+                        <p id="lastScanName" class="text-xs sm:text-sm font-bold text-slate-900 truncate mt-1"></p>
+                        <p id="lastScanDetail" class="text-[11px] text-slate-600 mt-0.5"></p>
                     </div>
-                    <div id="lastScanActions" class="flex items-center gap-1.5 shrink-0">
-                        <!-- Tombol cepat +1 / +1 Karton -->
-                    </div>
+                    <div id="lastScanActions" class="flex items-center gap-1.5 shrink-0"></div>
                 </div>
             </div>
         </section>
 
-        <!-- RINGKASAN STATUS 5 WARNA & AKSI PENYELESAIAN SESI -->
-        <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-3.5 sm:p-4 space-y-3">
-            <!-- 5 Pill Indikator Status -->
-            <div class="grid grid-cols-5 gap-1.5 sm:gap-2.5 text-center">
-                <button type="button" onclick="setFilterStatus('sesuai')" class="filter-stat-btn p-2 rounded-xl bg-emerald-50 border border-emerald-200 hover:ring-2 hover:ring-emerald-400/40 transition-all">
-                    <span id="countSesuai" class="block text-base sm:text-lg font-extrabold text-emerald-700 leading-none">0</span>
-                    <span class="block text-[10px] font-bold text-emerald-800 mt-1">Sesuai</span>
+        <!-- ======================================================================= -->
+        <!-- BAGIAN 2: RINGKASAN 5 STATUS VALIDASI & AKSI SESI                       -->
+        <!-- ======================================================================= -->
+        <section class="bg-white rounded-2xl border border-slate-200 shadow-xs p-3.5 space-y-3">
+            <div class="grid grid-cols-5 gap-1.5 text-center">
+                <button type="button" onclick="setFilterStatus('sesuai')"
+                        class="p-2 rounded-xl border border-emerald-200 bg-emerald-50/80 hover:bg-emerald-100/80 transition-all">
+                    <span id="countSesuai" class="block text-base sm:text-lg font-extrabold text-emerald-700 font-mono">0</span>
+                    <span class="block text-[10px] font-bold text-emerald-800 leading-tight mt-0.5">Sesuai</span>
                 </button>
-                <button type="button" onclick="setFilterStatus('kurang')" class="filter-stat-btn p-2 rounded-xl bg-amber-50 border border-amber-200 hover:ring-2 hover:ring-amber-400/40 transition-all">
-                    <span id="countKurang" class="block text-base sm:text-lg font-extrabold text-amber-700 leading-none">0</span>
-                    <span class="block text-[10px] font-bold text-amber-800 mt-1">Kurang</span>
+                <button type="button" onclick="setFilterStatus('kurang')"
+                        class="p-2 rounded-xl border border-amber-200 bg-amber-50/80 hover:bg-amber-100/80 transition-all">
+                    <span id="countKurang" class="block text-base sm:text-lg font-extrabold text-amber-700 font-mono">0</span>
+                    <span class="block text-[10px] font-bold text-amber-800 leading-tight mt-0.5">Kurang</span>
                 </button>
-                <button type="button" onclick="setFilterStatus('lebih')" class="filter-stat-btn p-2 rounded-xl bg-orange-50 border border-orange-200 hover:ring-2 hover:ring-orange-400/40 transition-all">
-                    <span id="countLebih" class="block text-base sm:text-lg font-extrabold text-orange-700 leading-none">0</span>
-                    <span class="block text-[10px] font-bold text-orange-800 mt-1">Lebih</span>
+                <button type="button" onclick="setFilterStatus('lebih')"
+                        class="p-2 rounded-xl border border-orange-200 bg-orange-50/80 hover:bg-orange-100/80 transition-all">
+                    <span id="countLebih" class="block text-base sm:text-lg font-extrabold text-orange-700 font-mono">0</span>
+                    <span class="block text-[10px] font-bold text-orange-800 leading-tight mt-0.5">Lebih</span>
                 </button>
-                <button type="button" onclick="setFilterStatus('tidak_ada')" class="filter-stat-btn p-2 rounded-xl bg-rose-50 border border-rose-200 hover:ring-2 hover:ring-rose-400/40 transition-all">
-                    <span id="countTidakAda" class="block text-base sm:text-lg font-extrabold text-rose-700 leading-none">0</span>
-                    <span class="block text-[10px] font-bold text-rose-800 mt-1">Tdk Ada</span>
+                <button type="button" onclick="setFilterStatus('tidak_ada')"
+                        class="p-2 rounded-xl border border-rose-200 bg-rose-50/80 hover:bg-rose-100/80 transition-all">
+                    <span id="countTidakAda" class="block text-base sm:text-lg font-extrabold text-rose-700 font-mono">0</span>
+                    <span class="block text-[10px] font-bold text-rose-800 leading-tight mt-0.5">Tdk Ada</span>
                 </button>
-                <button type="button" onclick="setFilterStatus('baru')" class="filter-stat-btn p-2 rounded-xl bg-indigo-50 border border-indigo-200 hover:ring-2 hover:ring-indigo-400/40 transition-all">
-                    <span id="countBaru" class="block text-base sm:text-lg font-extrabold text-indigo-700 leading-none">0</span>
-                    <span class="block text-[10px] font-bold text-indigo-800 mt-1">Brg Baru</span>
+                <button type="button" onclick="setFilterStatus('baru')"
+                        class="p-2 rounded-xl border border-indigo-200 bg-indigo-50/80 hover:bg-indigo-100/80 transition-all">
+                    <span id="countBaru" class="block text-base sm:text-lg font-extrabold text-indigo-700 font-mono">0</span>
+                    <span class="block text-[10px] font-bold text-indigo-800 leading-tight mt-0.5">Item Baru</span>
                 </button>
             </div>
 
-            <!-- Bar Filter & Tombol Selesaikan / Reset Pengecekan -->
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2 border-t border-slate-100">
-                <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
-                    <button type="button" onclick="setFilterStatus('all')" id="filterAllBtn"
-                            class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-slate-800 text-white shrink-0">
+            <!-- Bar Filter & Tombol Selesaikan Pengecekan -->
+            <div class="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-slate-100">
+                <div class="flex items-center gap-1.5 text-xs">
+                    <button type="button" onclick="setFilterStatus('all')"
+                            class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold">
                         Semua (<span id="countAll">0</span>)
                     </button>
-                    <button type="button" onclick="setFilterStatus('pending')" id="filterPendingBtn"
-                            class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 shrink-0">
-                        Belum Dicek (<span id="countPending">0</span>)
+                    <button type="button" onclick="setFilterStatus('pending')"
+                            class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium">
+                        Belum (<span id="countPending">0</span>)
                     </button>
-                    <button type="button" onclick="openNewItemModal('')"
-                            class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 shrink-0">
-                        + Input Item Baru
+                    <button type="button" onclick="openNewItemModal()"
+                            class="px-2.5 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold">
+                        + Item Baru
                     </button>
                 </div>
 
-                <div class="flex items-center gap-2">
-                    <button id="resetSessionBtn" type="button"
-                            class="px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 text-xs font-semibold transition-all">
-                        Reset Qty
-                    </button>
+                <div class="flex items-center gap-1.5 w-full sm:w-auto justify-between sm:justify-end">
+                    <span id="auditStatusText" class="text-[11px] font-semibold text-amber-600">Sesi Pengecekan Berjalan</span>
                     <button id="finishAuditBtn" type="button"
-                            class="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-4 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-xs transition-all active:scale-95">
+                            class="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-4 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-2xs transition-all">
                         <i class="fas fa-flag-checkered"></i>
                         <span id="finishAuditLabel">Selesaikan Pengecekan</span>
                     </button>
@@ -337,107 +321,121 @@
             </div>
         </section>
 
-        <!-- DAFTAR BARANG PENERIMAAN (LPB + ITEM BARU) -->
-        <section class="space-y-2.5">
-            <div class="flex items-center justify-between px-1">
-                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500">Daftar Item Penerimaan</h3>
-                <span id="auditStatusText" class="text-[11px] font-semibold text-amber-600">Sesi Pengecekan Berjalan</span>
+        <!-- ======================================================================= -->
+        <!-- BAGIAN 3: DAFTAR ITEM PENERIMAAN BARANG (LPB + ITEM BARU)               -->
+        <!-- ======================================================================= -->
+        <section id="itemsContainer" class="space-y-2.5">
+            <!-- Kartu produk dirender di sini -->
+        </section>
+
+        <!-- ======================================================================= -->
+        <!-- BAGIAN 4: RIWAYAT LOG AKTIVITAS SCAN HARIAN (INDEXEDDB + EXPORT CSV)    -->
+        <!-- ======================================================================= -->
+        <section class="bg-white rounded-2xl border border-slate-200 shadow-xs p-4 space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-slate-100">
+                <div class="flex items-center gap-2">
+                    <div class="w-7 h-7 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center">
+                        <i class="fas fa-history text-xs"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h3 class="text-xs sm:text-sm font-bold text-slate-900">Riwayat Log Aktivitas Scan Harian</h3>
+                            <span id="dailyLogCountBadge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">0 Log</span>
+                        </div>
+                        <p class="text-[11px] text-slate-500">Tersimpan otomatis di IndexedDB per tanggal</p>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-1.5">
+                    <input type="date" id="logDateFilter"
+                           class="rounded-xl border border-slate-300 bg-slate-50 px-2.5 py-1.5 text-xs font-semibold text-slate-700 focus:outline-none focus:border-indigo-500">
+                    <button type="button" onclick="exportDailyScanLogsToCSV()"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all active:scale-95">
+                        <i class="fas fa-file-csv"></i>
+                        <span>Export CSV</span>
+                    </button>
+                    <button type="button" onclick="clearLogsForSelectedDate()" title="Hapus log pada tanggal terpilih"
+                            class="p-1.5 rounded-xl border border-slate-200 bg-white hover:bg-rose-50 hover:text-rose-600 text-slate-500 text-xs transition-all">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
             </div>
 
-            <div id="itemsContainer" class="space-y-2.5">
-                <!-- Item cards di-render oleh JavaScript -->
+            <div id="dailyScanLogList" class="space-y-2 max-h-72 overflow-y-auto pr-1">
+                <!-- Riwayat log harian dirender di sini -->
             </div>
         </section>
 
     </main>
 
-    <!-- MODAL EXPORT MULTI-FORMAT (EXCEL .XLSX, CSV, JSON) -->
-    <div id="exportModal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
-        <div class="bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl border border-slate-200 shadow-2xl p-5 space-y-4">
-            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-                <div class="flex items-center gap-2.5">
-                    <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                        <i class="fas fa-file-export"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-sm font-extrabold text-slate-900">Export Hasil Pengecekan</h3>
-                        <p class="text-[11px] text-slate-500">Pilih format laporan audit penerimaan barang</p>
-                    </div>
+    <!-- ======================================================================= -->
+    <!-- MODAL 1: KONFIRMASI SCAN ULANG PRODUK YANG SAMA                         -->
+    <!-- ======================================================================= -->
+    <div id="rescanConfirmModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-xl max-w-sm w-full p-5 space-y-4">
+            <div class="flex items-start gap-3">
+                <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+                    <i class="fas fa-redo-alt text-base"></i>
                 </div>
-                <button type="button" onclick="closeModal('exportModal')" class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100">
-                    <i class="fas fa-times"></i>
-                </button>
+                <div class="min-w-0">
+                    <h3 class="text-sm font-extrabold text-slate-900">Produk Sudah Di-Scan</h3>
+                    <p class="text-xs text-slate-500 mt-0.5">Apakah kuantitas fisik ingin ditambahkan?</p>
+                </div>
             </div>
 
-            <!-- Ringkasan Cepat Sebelum Export -->
-            <div id="exportSummaryBox" class="rounded-xl bg-slate-50 border border-slate-200 p-3 text-xs space-y-1">
-                <!-- Diisi dinamis saat modal dibuka -->
+            <div class="rounded-xl bg-slate-50 border border-slate-200 p-3 space-y-1">
+                <p id="rescanProdName" class="text-xs font-bold text-slate-900 leading-snug"></p>
+                <p id="rescanProdMeta" class="text-[11px] font-mono text-slate-500"></p>
+                <p class="text-xs text-slate-700 pt-1">
+                    Qty Fisik Tercatat Saat Ini: <strong id="rescanCurrentQty" class="font-mono text-indigo-700">0</strong>
+                </p>
             </div>
 
-            <!-- 3 Pilihan Format Export -->
-            <div class="space-y-2.5">
-                <!-- 1. Export Excel (.xlsx) -->
-                <button type="button" onclick="exportToExcel()"
-                        class="w-full flex items-center justify-between p-3.5 rounded-xl border-2 border-emerald-200 bg-emerald-50/60 hover:bg-emerald-100/70 text-left transition-all group">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-base shrink-0 shadow-xs">
-                            <i class="fas fa-file-excel"></i>
-                        </div>
-                        <div>
-                            <span class="block text-xs sm:text-sm font-extrabold text-emerald-950">Export Excel (.xlsx)</span>
-                            <span class="block text-[11px] text-emerald-800">2 Sheet: Hasil Pengecekan & Ringkasan Audit</span>
-                        </div>
-                    </div>
-                    <i class="fas fa-download text-emerald-700 group-hover:translate-y-0.5 transition-transform"></i>
-                </button>
+            <div class="space-y-1.5">
+                <label for="rescanAddQtyInput" class="block text-xs font-bold text-slate-700">Jumlah Tambahan (Bisa Edit Manual):</label>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="stepRescanAddQty(-1)"
+                            class="w-10 h-10 rounded-xl border border-slate-300 bg-slate-50 hover:bg-slate-100 font-bold text-slate-700">
+                        <i class="fas fa-minus text-xs"></i>
+                    </button>
+                    <input type="number" id="rescanAddQtyInput" min="1" value="1" inputmode="numeric"
+                           onkeydown="if(event.key==='Enter'){ event.preventDefault(); confirmRescanAddQty(); }"
+                           class="flex-1 h-10 text-center rounded-xl border border-slate-300 font-mono text-base font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/25 focus:border-indigo-500">
+                    <button type="button" onclick="stepRescanAddQty(1)"
+                            class="w-10 h-10 rounded-xl border border-slate-300 bg-slate-50 hover:bg-slate-100 font-bold text-slate-700">
+                        <i class="fas fa-plus text-xs"></i>
+                    </button>
+                    <button id="rescanAddCartonBtn" type="button"
+                            class="hidden px-2.5 h-10 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-700 text-[11px] font-bold">
+                        +1 CRT
+                    </button>
+                </div>
+            </div>
 
-                <!-- 2. Export CSV (.csv) -->
-                <button type="button" onclick="exportToCSV()"
-                        class="w-full flex items-center justify-between p-3.5 rounded-xl border border-slate-200 bg-white hover:bg-sky-50/60 hover:border-sky-300 text-left transition-all group">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-sky-600 text-white flex items-center justify-center text-base shrink-0 shadow-xs">
-                            <i class="fas fa-file-csv"></i>
-                        </div>
-                        <div>
-                            <span class="block text-xs sm:text-sm font-extrabold text-slate-900">Export CSV (.csv)</span>
-                            <span class="block text-[11px] text-slate-500">UTF-8 BOM — siap buka di Excel / Spreadsheet</span>
-                        </div>
-                    </div>
-                    <i class="fas fa-download text-sky-600 group-hover:translate-y-0.5 transition-transform"></i>
+            <div class="grid grid-cols-2 gap-2 pt-1">
+                <button type="button" onclick="ignoreRescanItem()"
+                        class="py-2.5 px-3 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition-all">
+                    Tidak, Abaikan
                 </button>
-
-                <!-- 3. Export JSON (.json) -->
-                <button type="button" onclick="exportToJSON()"
-                        class="w-full flex items-center justify-between p-3.5 rounded-xl border border-slate-200 bg-white hover:bg-indigo-50/60 hover:border-indigo-300 text-left transition-all group">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-base shrink-0 shadow-xs">
-                            <i class="fas fa-file-code"></i>
-                        </div>
-                        <div>
-                            <span class="block text-xs sm:text-sm font-extrabold text-slate-900">Export JSON (.json)</span>
-                            <span class="block text-[11px] text-slate-500">Data terstruktur lengkap untuk integrasi sistem</span>
-                        </div>
-                    </div>
-                    <i class="fas fa-download text-indigo-600 group-hover:translate-y-0.5 transition-transform"></i>
+                <button type="button" onclick="confirmRescanAddQty()"
+                        class="py-2.5 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-2xs transition-all">
+                    Ya, Tambahkan
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL INPUT ITEM BARU (TIDAK TERCATAT DI LPB) -->
-    <div id="newItemModal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
-        <form id="newItemForm" class="bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl border border-slate-200 shadow-2xl p-5 space-y-3.5">
-            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-                <div class="flex items-center gap-2">
-                    <span class="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs">
-                        <i class="fas fa-box-open"></i>
-                    </span>
-                    <div>
-                        <h3 class="text-sm font-extrabold text-slate-900">Input Item Baru (Non-LPB)</h3>
-                        <p id="newItemSourceHint" class="text-[11px] text-indigo-600 font-medium">Barang tidak ada di daftar LPB</p>
-                    </div>
+    <!-- ======================================================================= -->
+    <!-- MODAL 2: INPUT ITEM BARU (TIDAK TERCATAT DI LPB)                        -->
+    <!-- ======================================================================= -->
+    <div id="newItemModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+        <form id="newItemForm" class="bg-white rounded-2xl border border-slate-200 shadow-xl max-w-md w-full p-5 space-y-3.5">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-sm font-extrabold text-slate-900">Input Produk Baru (Di Luar LPB)</h3>
+                    <p id="newItemSourceHint" class="text-[11px] text-indigo-600 font-medium mt-0.5"></p>
                 </div>
-                <button type="button" onclick="closeModal('newItemModal')" class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100">
+                <button type="button" onclick="closeModal('newItemModal')" class="p-1.5 text-slate-400 hover:text-slate-700">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
@@ -445,87 +443,149 @@
             <div class="grid grid-cols-2 gap-2.5">
                 <div>
                     <label class="block text-[11px] font-bold text-slate-700 mb-1">Barcode</label>
-                    <input type="text" id="newBarcode" required class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-mono">
+                    <input type="text" id="newBarcode" required
+                           class="w-full px-3 py-2 rounded-xl border border-slate-300 font-mono text-xs font-semibold">
                 </div>
                 <div>
                     <label class="block text-[11px] font-bold text-slate-700 mb-1">PLU (Opsional)</label>
-                    <input type="text" id="newPlu" placeholder="Auto / PLU" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-mono">
+                    <input type="text" id="newPlu"
+                           class="w-full px-3 py-2 rounded-xl border border-slate-300 font-mono text-xs">
                 </div>
             </div>
 
             <div>
-                <label class="block text-[11px] font-bold text-slate-700 mb-1">Deskripsi / Nama Produk *</label>
-                <input type="text" id="newDescp" required placeholder="Contoh: ROTI TAWAR SPECIAL 400GR" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs uppercase">
+                <label class="block text-[11px] font-bold text-slate-700 mb-1">Nama / Deskripsi Produk *</label>
+                <input type="text" id="newDescp" required placeholder="Contoh: ROTI TAWAR KUPAS SPECIAL"
+                       class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-semibold uppercase">
             </div>
 
             <div class="grid grid-cols-2 gap-2.5">
                 <div>
                     <label class="block text-[11px] font-bold text-slate-700 mb-1">Qty Fisik Diterima *</label>
-                    <input type="number" id="newQty" min="1" value="1" required class="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm font-bold text-indigo-700">
+                    <input type="number" id="newQty" min="1" value="1" required inputmode="numeric"
+                           class="w-full px-3 py-2 rounded-xl border border-slate-300 font-mono text-xs font-bold">
                 </div>
                 <div>
                     <label class="block text-[11px] font-bold text-slate-700 mb-1">Satuan</label>
-                    <input type="text" id="newSatuan" value="PCS" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs uppercase">
+                    <input type="text" id="newSatuan" value="PCS"
+                           class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-semibold uppercase">
                 </div>
             </div>
 
             <div>
-                <label class="block text-[11px] font-bold text-slate-700 mb-1">Catatan Tambahan</label>
-                <input type="text" id="newNote" placeholder="Misal: Barang titipan / bonus supplier" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs">
+                <label class="block text-[11px] font-bold text-slate-700 mb-1">Catatan</label>
+                <input type="text" id="newNote" placeholder="Keterangan tambahan..."
+                       class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs">
             </div>
 
-            <div class="pt-2 flex gap-2">
-                <button type="button" onclick="closeModal('newItemModal')" class="flex-1 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600">Batal</button>
-                <button type="submit" class="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold">Simpan Item Baru</button>
+            <div class="flex items-center justify-end gap-2 pt-2">
+                <button type="button" onclick="closeModal('newItemModal')"
+                        class="px-4 py-2 rounded-xl border border-slate-300 text-xs font-bold text-slate-700">
+                    Batal
+                </button>
+                <button type="submit"
+                        class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold">
+                    Simpan Item Baru
+                </button>
             </div>
         </form>
     </div>
 
-    <!-- MODAL PENGATURAN LINK GITHUB & IMPORT MANUAL JSON -->
-    <div id="settingsModal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
-        <div class="bg-white w-full sm:max-w-lg rounded-t-3xl sm:rounded-2xl border border-slate-200 shadow-2xl p-5 space-y-4 max-h-[90vh] overflow-y-auto">
-            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-                <h3 class="text-sm font-extrabold text-slate-900">Sumber Data GitHub & Offline Cache</h3>
-                <button type="button" onclick="closeModal('settingsModal')" class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100">
+    <!-- ======================================================================= -->
+    <!-- MODAL 3: EXPORT MULTI-FORMAT (EXCEL .XLSX, CSV, JSON)                   -->
+    <!-- ======================================================================= -->
+    <div id="exportModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-xl max-w-md w-full p-5 space-y-4">
+            <div class="flex items-center justify-between">
+                <h3 class="text-sm font-extrabold text-slate-900">Export Hasil Pengecekan Barang</h3>
+                <button type="button" onclick="closeModal('exportModal')" class="p-1.5 text-slate-400 hover:text-slate-700">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
 
-            <div class="space-y-3">
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-700 mb-1">URL Master Produk (GitHub JSON)</label>
-                    <input type="url" id="masterUrlInput" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-mono">
-                </div>
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-700 mb-1">URL Data Penerimaan / Received (GitHub JSON)</label>
-                    <input type="url" id="receivedUrlInput" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-mono">
-                </div>
-                <p class="text-[11px] text-slate-500">URL format <code class="bg-slate-100 px-1 rounded">/blob/</code> otomatis diubah ke <code class="bg-slate-100 px-1 rounded">raw.githubusercontent.com</code>.</p>
-
-                <button type="button" id="saveAndSyncUrlBtn" class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold">
-                    <i class="fas fa-cloud-download-alt mr-1.5"></i>Simpan URL & Tarik Data dari GitHub
-                </button>
+            <div id="exportSummaryBox" class="rounded-xl bg-slate-50 border border-slate-200 p-3 space-y-1.5 text-xs">
+                <!-- Ringkasan audit diisi dinamis -->
             </div>
 
-            <div class="pt-3 border-t border-slate-100 space-y-2">
-                <p class="text-[11px] font-bold text-slate-700">Atau Import File JSON Lokal (Offline):</p>
-                <div class="grid grid-cols-2 gap-2">
-                    <label class="flex items-center justify-center gap-1.5 p-2.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 cursor-pointer text-xs font-semibold text-slate-700">
-                        <i class="fas fa-database text-indigo-600"></i>
-                        <span>Upload master.json</span>
-                        <input type="file" id="importMasterFile" accept=".json" class="hidden">
-                    </label>
-                    <label class="flex items-center justify-center gap-1.5 p-2.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 cursor-pointer text-xs font-semibold text-slate-700">
-                        <i class="fas fa-receipt text-emerald-600"></i>
-                        <span>Upload received.json</span>
-                        <input type="file" id="importReceivedFile" accept=".json" class="hidden">
-                    </label>
-                </div>
+            <div class="space-y-2">
+                <button type="button" onclick="exportToExcel()"
+                        class="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-2xs transition-all">
+                    <span class="flex items-center gap-2"><i class="fas fa-file-excel text-base"></i> Export Microsoft Excel (.xlsx)</span>
+                    <span class="text-[10px] bg-emerald-700 px-2 py-0.5 rounded">2 Sheet</span>
+                </button>
+
+                <button type="button" onclick="exportToCSV()"
+                        class="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold transition-all">
+                    <span class="flex items-center gap-2"><i class="fas fa-file-csv text-base"></i> Export CSV (.csv)</span>
+                    <span class="text-[10px] bg-slate-700 px-2 py-0.5 rounded">UTF-8 BOM</span>
+                </button>
+
+                <button type="button" onclick="exportToJSON()"
+                        class="w-full flex items-center justify-between px-4 py-3 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-800 text-xs font-bold transition-all">
+                    <span class="flex items-center gap-2"><i class="fas fa-code text-base text-indigo-600"></i> Export JSON (.json)</span>
+                    <span class="text-[10px] bg-slate-100 px-2 py-0.5 rounded">Backup</span>
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- FOOTER KUSTOM SESUAI PERMINTAAN -->
+    <!-- ======================================================================= -->
+    <!-- MODAL 4: PENGATURAN LINK GITHUB, IMPORT JSON & RESET                    -->
+    <!-- ======================================================================= -->
+    <div id="settingsModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-xl max-w-md w-full p-5 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between">
+                <h3 class="text-sm font-extrabold text-slate-900">Pengaturan Sumber Data & Sesi</h3>
+                <button type="button" onclick="closeModal('settingsModal')" class="p-1.5 text-slate-400 hover:text-slate-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="space-y-2.5">
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-700 mb-1">Link GitHub Master Produk (master.json)</label>
+                    <input type="url" id="masterUrlInput"
+                           class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-mono">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-700 mb-1">Link GitHub Penerimaan Barang (received.json)</label>
+                    <input type="url" id="receivedUrlInput"
+                           class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-mono">
+                </div>
+                <button id="saveAndSyncUrlBtn" type="button"
+                        class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold">
+                    Simpan Link & Sinkronkan Sekarang
+                </button>
+            </div>
+
+            <div class="pt-3 border-t border-slate-200 space-y-2">
+                <p class="text-[11px] font-bold text-slate-700">Import File JSON Manual (Offline):</p>
+                <div class="grid grid-cols-2 gap-2">
+                    <label class="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-slate-300 bg-slate-50 hover:bg-slate-100 text-xs font-semibold cursor-pointer">
+                        <i class="fas fa-upload text-indigo-600"></i>
+                        <span>master.json</span>
+                        <input type="file" id="importMasterFile" accept=".json" class="hidden">
+                    </label>
+                    <label class="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-slate-300 bg-slate-50 hover:bg-slate-100 text-xs font-semibold cursor-pointer">
+                        <i class="fas fa-upload text-emerald-600"></i>
+                        <span>received.json</span>
+                        <input type="file" id="importReceivedFile" accept=".json" class="hidden">
+                    </label>
+                </div>
+            </div>
+
+            <div class="pt-3 border-t border-slate-200">
+                <button id="resetSessionBtn" type="button"
+                        class="w-full py-2 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold">
+                    Reset Semua Qty Fisik ke 0
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ======================================================================= -->
+    <!-- FOOTER KUSTOM SESUAI PERMINTAAN                                         -->
+    <!-- ======================================================================= -->
     <footer class="social-footer-container">
       <!-- Row 1: Icon Social Media (Tiduran / Horizontal) -->
       <div class="social-footer-bar">
@@ -570,43 +630,385 @@
 
     <script>
         // =========================================================================
-        // 1. KONFIGURASI DEFAULT & DATA FALLBACK
+        // 1. KONSTANTA URL GITHUB, DATA CADANGAN & LOGIKA VALIDASI
         // =========================================================================
         const DEFAULT_MASTER_URL = 'https://github.com/marked-on/entry_data/blob/main/master.json';
         const DEFAULT_RECEIVED_URL = 'https://github.com/marked-on/entry_data/blob/main/received.json';
 
         const FALLBACK_MASTER = [
-            { kd_store: "AM024", plu: "3022032", descp: "BENFARM FRANKFURTER CHICKEN SAUSAGE 300GR_1C8P", barcode: "8991649000662", isi1: "1", isi2: "8", sat1: "PCS", sat2: "CRT", lokasi: "CHILLER-A1" },
-            { kd_store: "AM024", plu: "60320145", descp: "RTE-A SEDAAP MIE CUP SEDUH KOREAN SPICY CHICKEN", barcode: "2201021", isi1: "1", isi2: "0", sat1: "PCS", sat2: "0", lokasi: "RAK-MIE" },
-            { kd_store: "AM024", plu: "30240254", descp: "CAMPINA GO MANGO 70 ML_1C26P", barcode: "8998009972454", isi1: "1", isi2: "26", sat1: "PCS", sat2: "CRT", lokasi: "FREEZER-1" }
+            { kd_store: "AM024", plu: "3022032", descp: "BENFARM FRANKFURTER CHICKEN SAUSAGE 300GR_1C8P", barcode: "8991649000662", isi1: "1", isi2: "8", sat1: "PCS", sat2: "CRT", lokasi: "" },
+            { kd_store: "AM024", plu: "60320145", descp: "RTE-A SEDAAP MIE CUP SEDUH KOREAN SPICY CHICKEN", barcode: "2201021", isi1: "1", isi2: "0", sat1: "PCS", sat2: "0", lokasi: "" },
+            { kd_store: "AM024", plu: "30240254", descp: "CAMPINA GO MANGO 70 ML_1C26P", barcode: "8998009972454", isi1: "1", isi2: "26", sat1: "PCS", sat2: "CRT", lokasi: "" },
+            { kd_store: "AM024", plu: "30220346", descp: "OOYE SOSIS SAPI 375GR", barcode: "8997204220612", isi1: "1", isi2: "24", sat1: "PCS", sat2: "CRT", lokasi: "" },
+            { kd_store: "AM024", plu: "60310175", descp: "RM TOPPING SCOOP&SKOOP_GR", barcode: "11005117", isi1: "1000", isi2: "1", sat1: "GR", sat2: "KG", lokasi: "" },
+            { kd_store: "AM024", plu: "40610325", descp: "TOPUP EMONEY MANDIRI 40K", barcode: "10022825", isi1: "1", isi2: "0", sat1: "PCS", sat2: "0", lokasi: "" },
+            { kd_store: "AM024", plu: "202501265", descp: "CITRA HBL PEARLY RADIANT UV 110ML", barcode: "8999999606008", isi1: "1", isi2: "36", sat1: "PCS", sat2: "CRT", lokasi: "" },
+            { kd_store: "AM024", plu: "107303101", descp: "SURPRICE GUMMY MANGO 108GR", barcode: "6925573192157", isi1: "1", isi2: "40", sat1: "PCS", sat2: "CRT", lokasi: "" },
+            { kd_store: "AM024", plu: "20110887", descp: "YOUVIT BEAUTI+ 30S_1C12P", barcode: "8992741950664", isi1: "1", isi2: "12", sat1: "PCS", sat2: "CRT", lokasi: "" },
+            { kd_store: "AM024", plu: "10620928", descp: "DEKA CREPES CHOCOBAN PCK 14GR_1C72P", barcode: "8995077603839", isi1: "1", isi2: "72", sat1: "PCS", sat2: "CRT", lokasi: "" }
         ];
 
         const FALLBACK_RECEIVED = [
-            { kd_store: "AM024", nama_store: "AMANDAMART MD LANDEAN GIRANG", kd_supp: "DCA01.A.102.1.B", nama_supp: "AMANDA, CV", faktur: "L-K26-0001", no_lpb: "AM024-K26-0001", tgl_faktur: "46327", plu: "60120310", barcode: "A075", descp: "AMANDA BROWNIES ORANGE CHEESE BOX", qty_rec: "3", cost: "49549.55", keterangan: "BKL" },
-            { kd_store: "AM024", nama_store: "AMANDAMART MD LANDEAN GIRANG", kd_supp: "DCA01.A.102.1.B", nama_supp: "AMANDA, CV", faktur: "L-K26-0001", no_lpb: "AM024-K26-0001", tgl_faktur: "46327", plu: "60120311", barcode: "A001", descp: "AMANDA BROWNIES ORIGINAL BOX", qty_rec: "90", cost: "42342.34", keterangan: "BKL" },
-            { kd_store: "AM024", nama_store: "AMANDAMART MD LANDEAN GIRANG", kd_supp: "DCA01.A.102.1.B", nama_supp: "AMANDA, CV", faktur: "L-K26-0001", no_lpb: "AM024-K26-0001", tgl_faktur: "46327", plu: "60120312", barcode: "A053", descp: "AMANDA BROWNIES ORIGINAL GANACHE CHOCO BOX", qty_rec: "3", cost: "65765.77", keterangan: "BKL" },
-            { kd_store: "AM024", nama_store: "AMANDAMART MD LANDEAN GIRANG", kd_supp: "DCA01.A.102.1.B", nama_supp: "AMANDA, CV", faktur: "L-K26-0001", no_lpb: "AM024-K26-0001", tgl_faktur: "46327", plu: "60120313", barcode: "A006", descp: "AMANDA BROWNIES PINK MARBLE BOX", qty_rec: "3", cost: "48648.65", keterangan: "BKL" },
-            { kd_store: "AM024", nama_store: "AMANDAMART MD LANDEAN GIRANG", kd_supp: "DCA01.A.102.1.B", nama_supp: "AMANDA, CV", faktur: "L-K26-0001", no_lpb: "AM024-K26-0001", tgl_faktur: "46327", plu: "60120314", barcode: "A003", descp: "AMANDA BROWNIES SARIKAYA PANDAN BOX", qty_rec: "10", cost: "46846.85", keterangan: "BKL" }
+            { kd_store: "AM024", nama_store: "AMANDAMART MD LANDEAN GIRANG", kd_supp: "DCA01.A.102.1.B", nama_supp: "AMANDA, CV", faktur: "L-K26-0001", no_lpb: "AM024-K26-0001", tgl_faktur: "46327", plu: "60120310", barcode: "A075", descp: "AMANDA BROWNIES ORANGE CHEESE BOX", qty_rec: "3", keterangan: "BKL" },
+            { kd_store: "AM024", nama_store: "AMANDAMART MD LANDEAN GIRANG", kd_supp: "DCA01.A.102.1.B", nama_supp: "AMANDA, CV", faktur: "L-K26-0001", no_lpb: "AM024-K26-0001", tgl_faktur: "46327", plu: "60120311", barcode: "A001", descp: "AMANDA BROWNIES ORIGINAL BOX", qty_rec: "90", keterangan: "BKL" },
+            { kd_store: "AM024", nama_store: "AMANDAMART MD LANDEAN GIRANG", kd_supp: "DCA01.A.102.1.B", nama_supp: "AMANDA, CV", faktur: "L-K26-0001", no_lpb: "AM024-K26-0001", tgl_faktur: "46327", plu: "60120312", barcode: "A053", descp: "AMANDA BROWNIES ORIGINAL GANACHE CHOCO BOX", qty_rec: "3", keterangan: "BKL" },
+            { kd_store: "AM024", nama_store: "AMANDAMART MD LANDEAN GIRANG", kd_supp: "DCA01.A.102.1.B", nama_supp: "AMANDA, CV", faktur: "L-K26-0001", no_lpb: "AM024-K26-0001", tgl_faktur: "46327", plu: "60120313", barcode: "A006", descp: "AMANDA BROWNIES PINK MARBLE BOX", qty_rec: "3", keterangan: "BKL" },
+            { kd_store: "AM024", nama_store: "AMANDAMART MD LANDEAN GIRANG", kd_supp: "DCA01.A.102.1.B", nama_supp: "AMANDA, CV", faktur: "L-K26-0001", no_lpb: "AM024-K26-0001", tgl_faktur: "46327", plu: "60120314", barcode: "A003", descp: "AMANDA BROWNIES SARIKAYA PANDAN BOX", qty_rec: "10", keterangan: "BKL" }
         ];
 
+        function findInMaster(code) {
+            const lower = String(code || '').trim().toLowerCase();
+            if (!lower) return null;
+            return state.masterProducts.find(m =>
+                String(m.barcode || '').trim().toLowerCase() === lower ||
+                String(m.plu || '').trim().toLowerCase() === lower
+            ) || null;
+        }
+
+        function buildReceivingSession(receivedArr, masterArr) {
+            const masterMapByPlu = new Map();
+            const masterMapByBarcode = new Map();
+            (masterArr || []).forEach(m => {
+                if (m.plu) masterMapByPlu.set(String(m.plu).trim().toLowerCase(), m);
+                if (m.barcode) masterMapByBarcode.set(String(m.barcode).trim().toLowerCase(), m);
+            });
+
+            return (receivedArr || []).map((rec, idx) => {
+                const pluKey = String(rec.plu || '').trim().toLowerCase();
+                const bcKey = String(rec.barcode || '').trim().toLowerCase();
+                const master = masterMapByPlu.get(pluKey) || masterMapByBarcode.get(bcKey) || {};
+
+                return {
+                    uid: `lpb_${idx}_${rec.plu || rec.barcode || idx}`,
+                    kd_store: rec.kd_store || master.kd_store || 'AM024',
+                    nama_store: rec.nama_store || '',
+                    kd_supp: rec.kd_supp || '',
+                    nama_supp: rec.nama_supp || '',
+                    faktur: rec.faktur || '-',
+                    no_lpb: rec.no_lpb || '-',
+                    tgl_faktur: formatExcelSerialDate(rec.tgl_faktur),
+                    plu: String(rec.plu || master.plu || '').trim(),
+                    barcode: String(rec.barcode || master.barcode || '').trim(),
+                    descp: rec.descp || master.descp || 'PRODUK TANPA NAMA',
+                    qty_rec: Number(rec.qty_rec) || 0,
+                    qty_fisik: 0,
+                    hasBeenScanned: false,
+                    sat1: master.sat1 && master.sat1 !== '0' ? master.sat1 : 'PCS',
+                    sat2: master.sat2 && master.sat2 !== '0' ? master.sat2 : '',
+                    isi2: Number(master.isi2) || 0,
+                    lokasi: master.lokasi || '',
+                    isNewItem: false,
+                    sourceLabel: 'LPB',
+                    keterangan: rec.keterangan || ''
+                };
+            });
+        }
+
+        function getItemValidationStatus(item) {
+            const rec = Number(item.qty_rec) || 0;
+            const phys = Number(item.qty_fisik) || 0;
+
+            if (item.isNewItem) {
+                return {
+                    key: 'baru',
+                    label: 'Item Baru',
+                    badgeClass: 'bg-indigo-100 text-indigo-800 border-indigo-200',
+                    cardBorder: 'bg-indigo-50/40 border-indigo-200',
+                    qtyColor: 'text-indigo-700'
+                };
+            }
+            if (phys === 0 && state.isAuditFinished) {
+                return {
+                    key: 'tidak_ada',
+                    label: 'Barang Tidak Ada',
+                    badgeClass: 'bg-rose-100 text-rose-800 border-rose-200',
+                    cardBorder: 'bg-rose-50/40 border-rose-200',
+                    qtyColor: 'text-rose-700'
+                };
+            }
+            if (phys === 0) {
+                return {
+                    key: 'pending',
+                    label: 'Menunggu Scan',
+                    badgeClass: 'bg-slate-100 text-slate-600 border-slate-200',
+                    cardBorder: 'bg-white border-slate-200',
+                    qtyColor: 'text-slate-800'
+                };
+            }
+            if (phys === rec) {
+                return {
+                    key: 'sesuai',
+                    label: 'Barang Sesuai',
+                    badgeClass: 'bg-emerald-100 text-emerald-800 border-emerald-200',
+                    cardBorder: 'bg-emerald-50/40 border-emerald-200',
+                    qtyColor: 'text-emerald-700'
+                };
+            }
+            if (phys < rec) {
+                return {
+                    key: 'kurang',
+                    label: 'Barang Kurang',
+                    badgeClass: 'bg-amber-100 text-amber-800 border-amber-200',
+                    cardBorder: 'bg-amber-50/40 border-amber-200',
+                    qtyColor: 'text-amber-700'
+                };
+            }
+            return {
+                key: 'lebih',
+                label: 'Barang Lebih',
+                badgeClass: 'bg-orange-100 text-orange-800 border-orange-200',
+                cardBorder: 'bg-orange-50/40 border-orange-200',
+                qtyColor: 'text-orange-700'
+            };
+        }
+
         // =========================================================================
-        // 2. INDEXEDDB WRAPPER UNTUK PENYIMPANAN OFFLINE
+        // 2. INDEXEDDB WRAPPER UNTUK PENYIMPANAN OFFLINE & LOG HARIAN
         // =========================================================================
-        const DB_NAME = 'ReceivingValidatorDB_v1';
+        const DB_NAME = 'ReceivingValidatorDB_v2';
         const DB_STORE = 'appStateStore';
+        const LOG_STORE = 'daily_scan_logs';
 
         function openIDB() {
             return new Promise((resolve, reject) => {
-                const req = indexedDB.open(DB_NAME, 1);
+                const req = indexedDB.open(DB_NAME, 2);
                 req.onupgradeneeded = (e) => {
                     const db = e.target.result;
                     if (!db.objectStoreNames.contains(DB_STORE)) {
                         db.createObjectStore(DB_STORE);
                     }
+                    if (!db.objectStoreNames.contains(LOG_STORE)) {
+                        const logStore = db.createObjectStore(LOG_STORE, {
+                            keyPath: 'log_id',
+                            autoIncrement: true
+                        });
+                        logStore.createIndex('by_date', 'tanggal_log', { unique: false });
+                    }
                 };
                 req.onsuccess = () => resolve(req.result);
                 req.onerror = () => reject(req.error);
             });
+        }
+
+        function getTodayDateKey() {
+            const now = new Date();
+            const y = now.getFullYear();
+            const m = String(now.getMonth() + 1).padStart(2, '0');
+            const d = String(now.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
+
+        function getFormattedTimeNow() {
+            return new Date().toLocaleTimeString('id-ID', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+        }
+
+        async function appendDailyScanLog(entry) {
+            try {
+                const db = await openIDB();
+                const firstRec = state.receivingItems[0] || {};
+                const record = {
+                    tanggal_log: entry.tanggal_log || getTodayDateKey(),
+                    waktu: entry.waktu || getFormattedTimeNow(),
+                    timestamp: Date.now(),
+                    kd_store: entry.kd_store || firstRec.kd_store || 'AM024',
+                    aksi: entry.aksi || 'SCAN_BARU',
+                    plu: entry.plu || '-',
+                    barcode: entry.barcode || '-',
+                    descp: entry.descp || 'TANPA DESKRIPSI',
+                    qty_lpb: Number(entry.qty_lpb ?? 0),
+                    qty_sebelum: Number(entry.qty_sebelum ?? 0),
+                    qty_sesudah: Number(entry.qty_sesudah ?? 0),
+                    status_validasi: entry.status_validasi || '-'
+                };
+
+                await new Promise((resolve, reject) => {
+                    const tx = db.transaction(LOG_STORE, 'readwrite');
+                    tx.objectStore(LOG_STORE).add(record);
+                    tx.oncomplete = () => resolve(true);
+                    tx.onerror = () => reject(tx.error);
+                });
+
+                const filterInput = document.getElementById('logDateFilter');
+                if (filterInput && filterInput.value === record.tanggal_log) {
+                    await renderDailyScanLogs(record.tanggal_log);
+                }
+            } catch (e) {
+                console.warn('Gagal menyimpan log harian:', e);
+            }
+        }
+
+        async function getDailyScanLogsByDate(dateKey) {
+            try {
+                const db = await openIDB();
+                return await new Promise((resolve, reject) => {
+                    const tx = db.transaction(LOG_STORE, 'readonly');
+                    const idx = tx.objectStore(LOG_STORE).index('by_date');
+                    const req = idx.getAll(IDBKeyRange.only(dateKey));
+                    req.onsuccess = () => {
+                        const rows = (req.result || []).sort((a, b) => b.timestamp - a.timestamp);
+                        resolve(rows);
+                    };
+                    req.onerror = () => reject(req.error);
+                });
+            } catch (e) {
+                console.warn('Gagal membaca log harian:', e);
+                return [];
+            }
+        }
+
+        async function clearLogsForSelectedDate() {
+            const dateInput = document.getElementById('logDateFilter');
+            const targetDate = (dateInput && dateInput.value) ? dateInput.value : getTodayDateKey();
+            try {
+                const db = await openIDB();
+                await new Promise((resolve, reject) => {
+                    const tx = db.transaction(LOG_STORE, 'readwrite');
+                    const store = tx.objectStore(LOG_STORE);
+                    const idx = store.index('by_date');
+                    const req = idx.openCursor(IDBKeyRange.only(targetDate));
+                    req.onsuccess = (e) => {
+                        const cursor = e.target.result;
+                        if (cursor) {
+                            cursor.delete();
+                            cursor.continue();
+                        }
+                    };
+                    tx.oncomplete = () => resolve(true);
+                    tx.onerror = () => reject(tx.error);
+                });
+                await renderDailyScanLogs(targetDate);
+                showToast(`Riwayat log tanggal ${targetDate} berhasil dibersihkan.`, 'info');
+            } catch (e) {
+                showToast('Gagal membersihkan riwayat log.', 'error');
+            }
+        }
+
+        async function exportDailyScanLogsToCSV() {
+            const dateInput = document.getElementById('logDateFilter');
+            const selectedDate = (dateInput && dateInput.value) ? dateInput.value : getTodayDateKey();
+            const logs = await getDailyScanLogsByDate(selectedDate);
+
+            if (!logs || logs.length === 0) {
+                showToast(`Riwayat log aktivitas scan pada tanggal ${selectedDate} masih kosong.`, 'warning');
+                return;
+            }
+
+            const chronologicalLogs = [...logs].sort((a, b) => a.timestamp - b.timestamp);
+            const firstRec = state.receivingItems[0] || {};
+            const storeCode = chronologicalLogs[0].kd_store || firstRec.kd_store || 'AM024';
+
+            const headers = [
+                'No',
+                'Tanggal Log',
+                'Waktu',
+                'Kode Store',
+                'Aksi',
+                'PLU',
+                'Barcode',
+                'Nama Produk',
+                'Qty LPB',
+                'Qty Sebelum',
+                'Qty Sesudah',
+                'Selisih Perubahan',
+                'Status Validasi'
+            ];
+
+            const escapeCsvCell = (val) => {
+                const str = String(val ?? '');
+                return `"${str.replace(/"/g, '""')}"`;
+            };
+
+            const csvLines = [headers.map(escapeCsvCell).join(',')];
+
+            chronologicalLogs.forEach((log, idx) => {
+                const qtySebelum = Number(log.qty_sebelum ?? 0);
+                const qtySesudah = Number(log.qty_sesudah ?? 0);
+                const selisihPerubahan = log.aksi === 'SCAN_ABAIKAN' ? 0 : (qtySesudah - qtySebelum);
+
+                const rowValues = [
+                    idx + 1,
+                    log.tanggal_log || selectedDate,
+                    log.waktu || '-',
+                    log.kd_store || storeCode,
+                    log.aksi || '-',
+                    log.plu || '-',
+                    log.barcode || '-',
+                    log.descp || '-',
+                    Number(log.qty_lpb ?? 0),
+                    qtySebelum,
+                    qtySesudah,
+                    selisihPerubahan,
+                    log.status_validasi || '-'
+                ];
+
+                csvLines.push(rowValues.map(escapeCsvCell).join(','));
+            });
+
+            const csvString = '\uFEFF' + csvLines.join('\r\n');
+            const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+            const filename = `Log_Scan_Receiving_${storeCode}_${selectedDate}.csv`;
+            triggerDownload(blob, filename);
+            showToast(`Berhasil mengunduh ${filename} (${chronologicalLogs.length} baris log).`, 'success');
+        }
+
+        async function renderDailyScanLogs(dateKey = null) {
+            const filterEl = document.getElementById('logDateFilter');
+            const targetDate = dateKey || (filterEl && filterEl.value) || getTodayDateKey();
+            const listEl = document.getElementById('dailyScanLogList');
+            const countBadge = document.getElementById('dailyLogCountBadge');
+            if (!listEl) return;
+
+            const logs = await getDailyScanLogsByDate(targetDate);
+            if (countBadge) countBadge.textContent = `${logs.length} Log`;
+
+            if (logs.length === 0) {
+                listEl.innerHTML = `
+                    <div class="rounded-xl border border-dashed border-slate-200 bg-slate-50/60 p-5 text-center text-xs text-slate-500">
+                        Belum ada riwayat aktivitas scan pada tanggal <strong>${targetDate}</strong>.
+                    </div>
+                `;
+                return;
+            }
+
+            const aksiStyleMap = {
+                'SCAN_BARU': { label: 'Scan Baru', cls: 'bg-emerald-100 text-emerald-800 border-emerald-200' },
+                'SCAN_TAMBAH': { label: 'Scan Ulang (+)', cls: 'bg-indigo-100 text-indigo-800 border-indigo-200' },
+                'SCAN_ABAIKAN': { label: 'Scan Diabaikan', cls: 'bg-slate-200 text-slate-700 border-slate-300' },
+                'EDIT_MANUAL': { label: 'Edit Manual', cls: 'bg-amber-100 text-amber-800 border-amber-200' },
+                'ITEM_BARU': { label: 'Input Item Baru', cls: 'bg-purple-100 text-purple-800 border-purple-200' }
+            };
+
+            listEl.innerHTML = logs.map(log => {
+                const badge = aksiStyleMap[log.aksi] || { label: log.aksi, cls: 'bg-slate-100 text-slate-700 border-slate-200' };
+                const delta = Number(log.qty_sesudah) - Number(log.qty_sebelum);
+                const changeText = log.aksi === 'SCAN_ABAIKAN'
+                    ? `Tetap ${log.qty_sesudah} (Diabaikan)`
+                    : `${log.qty_sebelum} → ${log.qty_sesudah} (${delta >= 0 ? '+' + delta : delta})`;
+
+                return `
+                    <div class="rounded-xl border border-slate-200 bg-slate-50/50 p-2.5 text-xs flex items-start justify-between gap-2">
+                        <div class="min-w-0 flex-1">
+                            <div class="flex items-center gap-1.5 flex-wrap">
+                                <span class="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded bg-white border border-slate-200 text-slate-700">${log.waktu}</span>
+                                <span class="px-2 py-0.5 rounded text-[10px] font-extrabold border ${badge.cls}">${badge.label}</span>
+                                <span class="font-mono text-[10px] text-slate-500">PLU: ${log.plu} • BC: ${log.barcode}</span>
+                            </div>
+                            <p class="font-bold text-slate-900 truncate mt-1">${log.descp}</p>
+                            <p class="text-[11px] text-slate-600 mt-0.5">
+                                Qty: <strong class="font-mono text-slate-900">${changeText}</strong>
+                                <span class="text-slate-400 mx-1">|</span>
+                                LPB: <span class="font-mono">${log.qty_lpb}</span>
+                                <span class="text-slate-400 mx-1">|</span>
+                                Status: <strong>${log.status_validasi}</strong>
+                            </p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
         }
 
         async function idbGet(key) {
@@ -644,10 +1046,11 @@
         // =========================================================================
         const state = {
             masterProducts: [],
-            receivingItems: [], // Item gabungan LPB + Item Baru
+            receivingItems: [],
             isAuditFinished: false,
             filterStatus: 'all',
             lastScannedId: null,
+            pendingRescanItem: null,
             masterUrl: DEFAULT_MASTER_URL,
             receivedUrl: DEFAULT_RECEIVED_URL,
             html5QrCode: null,
@@ -659,7 +1062,6 @@
             lastScanText: ''
         };
 
-        // Konversi URL GitHub /blob/ ke raw.githubusercontent.com
         function normalizeGithubRawUrl(url) {
             if (!url) return '';
             let clean = url.trim();
@@ -671,7 +1073,6 @@
             return clean;
         }
 
-        // Konversi Serial Tanggal Excel (misal "46327") menjadi YYYY-MM-DD
         function formatExcelSerialDate(val) {
             if (!val) return '-';
             const str = String(val).trim();
@@ -686,7 +1087,6 @@
             return str;
         }
 
-        // Ekstrak array dari respons JSON (mendukung array langsung atau object wrapper)
         function extractArrayPayload(json) {
             if (Array.isArray(json)) return json;
             if (json && typeof json === 'object') {
@@ -697,7 +1097,6 @@
             return [];
         }
 
-        // Umpan Balik Suara (Web Audio API) & Getar
         function playFeedbackTone(type) {
             try {
                 if (navigator.vibrate) {
@@ -733,6 +1132,7 @@
             const banner = document.getElementById('toastBanner');
             const icon = document.getElementById('toastIcon');
             const text = document.getElementById('toastText');
+            if (!banner || !icon || !text) return;
 
             banner.className = 'fixed top-18 left-1/2 -translate-x-1/2 z-50 max-w-md w-[92%] rounded-2xl px-4 py-3 shadow-lg border text-xs font-semibold flex items-center justify-between gap-3 transition-all';
             if (type === 'success') {
@@ -756,145 +1156,22 @@
         }
 
         function hideToast() {
-            document.getElementById('toastBanner').classList.add('hidden');
+            const banner = document.getElementById('toastBanner');
+            if (banner) banner.classList.add('hidden');
         }
 
         function openModal(id) {
-            document.getElementById(id).classList.remove('hidden');
+            const el = document.getElementById(id);
+            if (el) el.classList.remove('hidden');
         }
 
         function closeModal(id) {
-            document.getElementById(id).classList.add('hidden');
+            const el = document.getElementById(id);
+            if (el) el.classList.add('hidden');
         }
 
         // =========================================================================
-        // 4. LOGIKA VALIDASI 5 STATUS BARANG
-        // =========================================================================
-        function getItemValidationStatus(item) {
-            // 5. Item Baru (tidak tercatat di LPB)
-            if (item.isNewItem) {
-                return {
-                    key: 'baru',
-                    label: 'Item Baru',
-                    badgeClass: 'bg-indigo-100 text-indigo-800 border-indigo-300',
-                    cardBorder: 'border-indigo-300 bg-indigo-50/30',
-                    qtyColor: 'text-indigo-700'
-                };
-            }
-
-            const qtyRec = Number(item.qty_rec) || 0;
-            const qtyFisik = Number(item.qty_fisik) || 0;
-
-            // Jika fisik masih 0
-            if (qtyFisik === 0) {
-                if (state.isAuditFinished) {
-                    // 4. Barang Tidak Ada (Merah) ketika sesi sudah dinyatakan selesai
-                    return {
-                        key: 'tidak_ada',
-                        label: 'Barang Tidak Ada',
-                        badgeClass: 'bg-rose-100 text-rose-800 border-rose-300',
-                        cardBorder: 'border-rose-300 bg-rose-50/40',
-                        qtyColor: 'text-rose-700'
-                    };
-                }
-                return {
-                    key: 'pending',
-                    label: 'Belum Dicek',
-                    badgeClass: 'bg-slate-100 text-slate-600 border-slate-200',
-                    cardBorder: 'border-slate-200 bg-white',
-                    qtyColor: 'text-slate-700'
-                };
-            }
-
-            // 1. Barang Sesuai (Hijau)
-            if (qtyFisik === qtyRec) {
-                return {
-                    key: 'sesuai',
-                    label: 'Barang Sesuai',
-                    badgeClass: 'bg-emerald-100 text-emerald-800 border-emerald-300',
-                    cardBorder: 'border-emerald-300 bg-emerald-50/35',
-                    qtyColor: 'text-emerald-700'
-                };
-            }
-
-            // 2. Barang Kurang (Kuning)
-            if (qtyFisik < qtyRec) {
-                return {
-                    key: 'kurang',
-                    label: 'Barang Kurang',
-                    badgeClass: 'bg-amber-100 text-amber-800 border-amber-300',
-                    cardBorder: 'border-amber-300 bg-amber-50/35',
-                    qtyColor: 'text-amber-700'
-                };
-            }
-
-            // 3. Barang Lebih (Oranye)
-            return {
-                key: 'lebih',
-                label: 'Barang Lebih',
-                badgeClass: 'bg-orange-100 text-orange-800 border-orange-300',
-                cardBorder: 'border-orange-300 bg-orange-50/35',
-                qtyColor: 'text-orange-700'
-            };
-        }
-
-        // Mencari info tambahan dari Master Produk berdasarkan PLU atau Barcode
-        function findInMaster(code) {
-            const clean = String(code || '').trim().toLowerCase();
-            if (!clean) return null;
-            return state.masterProducts.find(m =>
-                String(m.barcode || '').trim().toLowerCase() === clean ||
-                String(m.plu || '').trim().toLowerCase() === clean
-            ) || null;
-        }
-
-        // Menggabungkan data received.json dengan referensi master.json
-        function buildReceivingSession(receivedRaw, masterRaw) {
-            const masterMapByPlu = new Map();
-            const masterMapByBarcode = new Map();
-
-            masterRaw.forEach(m => {
-                if (m.plu) masterMapByPlu.set(String(m.plu).trim(), m);
-                if (m.barcode) masterMapByBarcode.set(String(m.barcode).trim(), m);
-            });
-
-            return receivedRaw.map((rec, idx) => {
-                const pluKey = String(rec.plu || '').trim();
-                const barKey = String(rec.barcode || '').trim();
-                const masterMatch = masterMapByPlu.get(pluKey) || masterMapByBarcode.get(barKey) || null;
-
-                const isi2 = masterMatch ? (parseInt(masterMatch.isi2, 10) || 0) : 0;
-                const sat1 = masterMatch && masterMatch.sat1 ? masterMatch.sat1 : 'PCS';
-                const sat2 = masterMatch && masterMatch.sat2 && masterMatch.sat2 !== '0' ? masterMatch.sat2 : '';
-                const lokasi = masterMatch && masterMatch.lokasi ? masterMatch.lokasi : '';
-
-                return {
-                    uid: `lpb_${idx}_${pluKey || barKey || Date.now()}`,
-                    kd_store: rec.kd_store || (masterMatch ? masterMatch.kd_store : 'AM024'),
-                    nama_store: rec.nama_store || '',
-                    kd_supp: rec.kd_supp || '',
-                    nama_supp: rec.nama_supp || '',
-                    faktur: rec.faktur || '',
-                    no_lpb: rec.no_lpb || '',
-                    tgl_faktur: formatExcelSerialDate(rec.tgl_faktur),
-                    plu: pluKey,
-                    barcode: barKey,
-                    descp: rec.descp || (masterMatch ? masterMatch.descp : 'TANPA DESKRIPSI'),
-                    qty_rec: Number(rec.qty_rec) || 0,
-                    qty_fisik: 0,
-                    sat1,
-                    sat2,
-                    isi2,
-                    lokasi,
-                    isNewItem: false,
-                    sourceLabel: 'LPB',
-                    keterangan: rec.keterangan || ''
-                };
-            });
-        }
-
-        // =========================================================================
-        // 5. PENANGANAN SCAN BARCODE & PERUBAHAN QTY
+        // 5. PENANGANAN SCAN BARCODE, KONFIRMASI SCAN ULANG & EDIT QTY MANUAL
         // =========================================================================
         function processScannedCode(rawCode) {
             const code = String(rawCode || '').trim();
@@ -902,36 +1179,146 @@
 
             const lower = code.toLowerCase();
 
-            // 1. Cari di daftar penerimaan saat ini (berdasarkan Barcode atau PLU)
             const matchedItem = state.receivingItems.find(item =>
                 String(item.barcode || '').trim().toLowerCase() === lower ||
                 String(item.plu || '').trim().toLowerCase() === lower
             );
 
             if (matchedItem) {
-                matchedItem.qty_fisik = (Number(matchedItem.qty_fisik) || 0) + 1;
+                const currentQty = Number(matchedItem.qty_fisik) || 0;
+
+                if (currentQty > 0 || matchedItem.hasBeenScanned) {
+                    playFeedbackTone('baru');
+                    openRescanConfirmModal(matchedItem);
+                    return;
+                }
+
+                matchedItem.qty_fisik = 1;
+                matchedItem.hasBeenScanned = true;
                 state.lastScannedId = matchedItem.uid;
 
                 const statusInfo = getItemValidationStatus(matchedItem);
                 playFeedbackTone(statusInfo.key);
                 saveSessionToIDB();
+                appendDailyScanLog({
+                    aksi: 'SCAN_BARU',
+                    kd_store: matchedItem.kd_store,
+                    plu: matchedItem.plu,
+                    barcode: matchedItem.barcode,
+                    descp: matchedItem.descp,
+                    qty_lpb: matchedItem.qty_rec,
+                    qty_sebelum: 0,
+                    qty_sesudah: 1,
+                    status_validasi: statusInfo.label
+                });
                 renderAll();
                 showLastScanBanner(matchedItem);
                 return;
             }
 
-            // 2. Tidak ada di LPB -> Cek apakah ada di Master Produk
             const masterMatch = findInMaster(code);
             playFeedbackTone('baru');
 
             if (masterMatch) {
-                // Otomatis tambahkan sebagai Item Baru dari Master Produk atau buka modal terisi
                 openNewItemModal(code, masterMatch);
                 showToast('Produk ditemukan di Master, tapi tidak ada di LPB!', 'warning');
             } else {
-                // Produk benar-benar baru (tidak di LPB maupun Master)
                 openNewItemModal(code, null);
                 showToast('Barcode tidak terdaftar di LPB maupun Master!', 'warning');
+            }
+        }
+
+        function openRescanConfirmModal(item) {
+            state.pendingRescanItem = item;
+            document.getElementById('rescanProdName').textContent = item.descp;
+            document.getElementById('rescanProdMeta').textContent = `PLU: ${item.plu || '-'} • Barcode: ${item.barcode || '-'} • LPB: ${item.qty_rec}`;
+            document.getElementById('rescanCurrentQty').textContent = `${item.qty_fisik || 0} ${item.sat1}`;
+
+            const addInput = document.getElementById('rescanAddQtyInput');
+            addInput.value = 1;
+
+            const crtBtn = document.getElementById('rescanAddCartonBtn');
+            if (item.isi2 > 1) {
+                crtBtn.textContent = `+1 ${item.sat2 || 'CRT'} (${item.isi2})`;
+                crtBtn.onclick = () => {
+                    addInput.value = item.isi2;
+                    addInput.focus();
+                };
+                crtBtn.classList.remove('hidden');
+            } else {
+                crtBtn.classList.add('hidden');
+            }
+
+            openModal('rescanConfirmModal');
+            setTimeout(() => {
+                addInput.focus();
+                addInput.select();
+            }, 80);
+        }
+
+        function stepRescanAddQty(delta) {
+            const input = document.getElementById('rescanAddQtyInput');
+            const nextVal = Math.max(1, (parseInt(input.value, 10) || 1) + delta);
+            input.value = nextVal;
+        }
+
+        async function confirmRescanAddQty() {
+            const item = state.pendingRescanItem;
+            if (!item) {
+                closeModal('rescanConfirmModal');
+                return;
+            }
+
+            const addInput = document.getElementById('rescanAddQtyInput');
+            const addQty = Math.max(1, parseInt(addInput.value, 10) || 1);
+            const qtySebelum = Number(item.qty_fisik) || 0;
+            const qtySesudah = qtySebelum + addQty;
+
+            item.qty_fisik = qtySesudah;
+            item.hasBeenScanned = true;
+            state.lastScannedId = item.uid;
+            state.pendingRescanItem = null;
+
+            const st = getItemValidationStatus(item);
+            playFeedbackTone(st.key);
+            closeModal('rescanConfirmModal');
+            await saveSessionToIDB();
+            await appendDailyScanLog({
+                aksi: 'SCAN_TAMBAH',
+                kd_store: item.kd_store,
+                plu: item.plu,
+                barcode: item.barcode,
+                descp: item.descp,
+                qty_lpb: item.qty_rec,
+                qty_sebelum: qtySebelum,
+                qty_sesudah: qtySesudah,
+                status_validasi: st.label
+            });
+            renderAll();
+            showLastScanBanner(item);
+            showToast(`Ditambahkan +${addQty} ${item.sat1} ke ${item.descp}`, 'success');
+        }
+
+        async function ignoreRescanItem() {
+            const item = state.pendingRescanItem;
+            state.pendingRescanItem = null;
+            closeModal('rescanConfirmModal');
+
+            if (item) {
+                const curQty = Number(item.qty_fisik) || 0;
+                const st = getItemValidationStatus(item);
+                await appendDailyScanLog({
+                    aksi: 'SCAN_ABAIKAN',
+                    kd_store: item.kd_store,
+                    plu: item.plu,
+                    barcode: item.barcode,
+                    descp: item.descp,
+                    qty_lpb: item.qty_rec,
+                    qty_sebelum: curQty,
+                    qty_sesudah: curQty,
+                    status_validasi: st.label
+                });
+                showToast(`Scan ulang "${item.descp}" diabaikan.`, 'info');
             }
         }
 
@@ -939,31 +1326,100 @@
             const item = state.receivingItems.find(i => i.uid === uid);
             if (!item) return;
 
-            const nextVal = Math.max(0, (Number(item.qty_fisik) || 0) + delta);
+            const qtySebelum = Number(item.qty_fisik) || 0;
+            const nextVal = Math.max(0, qtySebelum + delta);
+            if (nextVal === qtySebelum) return;
+
             item.qty_fisik = nextVal;
+            if (nextVal > 0) item.hasBeenScanned = true;
             state.lastScannedId = item.uid;
 
             const st = getItemValidationStatus(item);
             playFeedbackTone(st.key);
             saveSessionToIDB();
+            appendDailyScanLog({
+                aksi: 'EDIT_MANUAL',
+                kd_store: item.kd_store,
+                plu: item.plu,
+                barcode: item.barcode,
+                descp: item.descp,
+                qty_lpb: item.qty_rec,
+                qty_sebelum: qtySebelum,
+                qty_sesudah: nextVal,
+                status_validasi: st.label
+            });
             renderAll();
             showLastScanBanner(item);
         }
 
-        function setDirectItemQty(uid, val) {
+        function handleLiveManualQtyInput(uid, rawVal, inputEl) {
             const item = state.receivingItems.find(i => i.uid === uid);
             if (!item) return;
-            item.qty_fisik = Math.max(0, parseInt(val, 10) || 0);
+
+            const parsed = rawVal === '' ? 0 : Math.max(0, parseInt(rawVal, 10) || 0);
+            item.qty_fisik = parsed;
+            if (parsed > 0) item.hasBeenScanned = true;
             state.lastScannedId = item.uid;
+
+            const st = getItemValidationStatus(item);
+            const cardEl = inputEl.closest('[data-item-card]');
+            if (cardEl) {
+                cardEl.className = `rounded-2xl border p-3.5 transition-all shadow-2xs ${st.cardBorder}`;
+                const badgeEl = cardEl.querySelector('[data-status-badge]');
+                if (badgeEl) {
+                    badgeEl.className = `px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase border ${st.badgeClass}`;
+                    badgeEl.textContent = st.label;
+                }
+                const diffEl = cardEl.querySelector('[data-diff-label]');
+                if (diffEl) {
+                    const diff = parsed - (Number(item.qty_rec) || 0);
+                    diffEl.className = `font-mono font-bold ${st.qtyColor}`;
+                    diffEl.textContent = item.isNewItem
+                        ? `+${parsed} (Baru)`
+                        : (diff === 0 ? 'Pas (0)' : (diff > 0 ? `+${diff}` : `${diff}`));
+                }
+                inputEl.className = `w-14 h-8 text-center font-mono text-xs sm:text-sm font-extrabold ${st.qtyColor} focus:outline-none focus:bg-indigo-50/40`;
+            }
+
+            updateSummaryCountersOnly();
+            saveSessionToIDB();
+        }
+
+        function finalizeManualQtyEdit(uid, inputEl) {
+            const item = state.receivingItems.find(i => i.uid === uid);
+            if (!item) return;
+
+            const prevSnapshot = parseInt(inputEl.dataset.prevQty ?? '0', 10) || 0;
+            const currentQty = Math.max(0, parseInt(inputEl.value, 10) || 0);
+            inputEl.value = currentQty;
+            item.qty_fisik = currentQty;
+
+            if (currentQty !== prevSnapshot) {
+                inputEl.dataset.prevQty = String(currentQty);
+                const st = getItemValidationStatus(item);
+                appendDailyScanLog({
+                    aksi: 'EDIT_MANUAL',
+                    kd_store: item.kd_store,
+                    plu: item.plu,
+                    barcode: item.barcode,
+                    descp: item.descp,
+                    qty_lpb: item.qty_rec,
+                    qty_sebelum: prevSnapshot,
+                    qty_sesudah: currentQty,
+                    status_validasi: st.label
+                });
+                showLastScanBanner(item);
+            }
+
             saveSessionToIDB();
             renderAll();
-            showLastScanBanner(item);
         }
 
         function removeNewItem(uid) {
             state.receivingItems = state.receivingItems.filter(i => i.uid !== uid);
             if (state.lastScannedId === uid) {
-                document.getElementById('lastScannedCard').classList.add('hidden');
+                const lastCard = document.getElementById('lastScannedCard');
+                if (lastCard) lastCard.classList.add('hidden');
             }
             saveSessionToIDB();
             renderAll();
@@ -991,10 +1447,6 @@
         // =========================================================================
         // 6. EXPORT MULTI-FORMAT: EXCEL (.XLSX), CSV (.CSV), DAN JSON (.JSON)
         // =========================================================================
-
-        /**
-         * Menyusun baris data audit terstandar untuk keperluan export (Excel, CSV, JSON)
-         */
         function buildAuditExportDataset() {
             const firstRec = state.receivingItems[0] || {};
             const storeCode = firstRec.kd_store || 'AM024';
@@ -1070,29 +1522,29 @@
 
         function openExportModal() {
             const { summary } = buildAuditExportDataset();
-            document.getElementById('exportSummaryBox').innerHTML = `
-                <div class="flex justify-between text-slate-600">
-                    <span>Store / Status Sesi:</span>
-                    <strong class="text-slate-900">${summary.kodeStore} • ${summary.statusSesi}</strong>
-                </div>
-                <div class="flex justify-between text-slate-600">
-                    <span>Total Item / Total Qty Fisik:</span>
-                    <strong class="text-slate-900">${summary.totalItem} item (${summary.totalQtyFisik} pcs)</strong>
-                </div>
-                <div class="flex flex-wrap gap-1.5 pt-1 text-[10px] font-bold">
-                    <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">Sesuai: ${summary.barangSesuai}</span>
-                    <span class="px-2 py-0.5 rounded bg-amber-100 text-amber-800">Kurang: ${summary.barangKurang}</span>
-                    <span class="px-2 py-0.5 rounded bg-orange-100 text-orange-800">Lebih: ${summary.barangLebih}</span>
-                    <span class="px-2 py-0.5 rounded bg-rose-100 text-rose-800">Tdk Ada: ${summary.barangTidakAda}</span>
-                    <span class="px-2 py-0.5 rounded bg-indigo-100 text-indigo-800">Baru: ${summary.itemBaru}</span>
-                </div>
-            `;
+            const box = document.getElementById('exportSummaryBox');
+            if (box) {
+                box.innerHTML = `
+                    <div class="flex justify-between text-slate-600">
+                        <span>Store / Status Sesi:</span>
+                        <strong class="text-slate-900">${summary.kodeStore} • ${summary.statusSesi}</strong>
+                    </div>
+                    <div class="flex justify-between text-slate-600">
+                        <span>Total Item / Total Qty Fisik:</span>
+                        <strong class="text-slate-900">${summary.totalItem} item (${summary.totalQtyFisik} pcs)</strong>
+                    </div>
+                    <div class="flex flex-wrap gap-1.5 pt-1 text-[10px] font-bold">
+                        <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">Sesuai: ${summary.barangSesuai}</span>
+                        <span class="px-2 py-0.5 rounded bg-amber-100 text-amber-800">Kurang: ${summary.barangKurang}</span>
+                        <span class="px-2 py-0.5 rounded bg-orange-100 text-orange-800">Lebih: ${summary.barangLebih}</span>
+                        <span class="px-2 py-0.5 rounded bg-rose-100 text-rose-800">Tdk Ada: ${summary.barangTidakAda}</span>
+                        <span class="px-2 py-0.5 rounded bg-indigo-100 text-indigo-800">Baru: ${summary.itemBaru}</span>
+                    </div>
+                `;
+            }
             openModal('exportModal');
         }
 
-        /**
-         * a) Export ke Microsoft Excel (.xlsx) dengan 2 Sheet & auto column width
-         */
         function exportToExcel() {
             if (typeof XLSX === 'undefined') {
                 showToast('Library SheetJS belum siap. Periksa koneksi internet.', 'error');
@@ -1102,31 +1554,14 @@
             const { rows, summary, baseFileName } = buildAuditExportDataset();
             const wb = XLSX.utils.book_new();
 
-            // Sheet 1: Hasil Pengecekan
             const wsDetail = XLSX.utils.json_to_sheet(rows);
             wsDetail['!cols'] = [
-                { wch: 5 },  // No
-                { wch: 16 }, // No LPB
-                { wch: 14 }, // Faktur
-                { wch: 11 }, // Kode Store
-                { wch: 18 }, // Kode Supplier
-                { wch: 24 }, // Nama Supplier
-                { wch: 12 }, // Tgl Faktur
-                { wch: 12 }, // PLU
-                { wch: 16 }, // Barcode
-                { wch: 42 }, // Nama Produk
-                { wch: 8 },  // Satuan
-                { wch: 11 }, // Isi Karton
-                { wch: 10 }, // Qty LPB
-                { wch: 10 }, // Qty Fisik
-                { wch: 10 }, // Selisih
-                { wch: 18 }, // Status Validasi
-                { wch: 13 }, // Sumber Item
-                { wch: 28 }  // Catatan
+                { wch: 5 }, { wch: 16 }, { wch: 14 }, { wch: 11 }, { wch: 18 }, { wch: 24 },
+                { wch: 12 }, { wch: 12 }, { wch: 16 }, { wch: 42 }, { wch: 8 }, { wch: 11 },
+                { wch: 10 }, { wch: 10 }, { wch: 10 }, { wch: 18 }, { wch: 13 }, { wch: 28 }
             ];
             XLSX.utils.book_append_sheet(wb, wsDetail, 'Hasil Pengecekan');
 
-            // Sheet 2: Ringkasan Audit
             const summaryRows = [
                 { Parameter: 'Waktu Export', Nilai: summary.waktuExport },
                 { Parameter: 'Kode Store', Nilai: summary.kodeStore },
@@ -1152,9 +1587,6 @@
             showToast(`Berhasil mengunduh ${baseFileName}.xlsx`, 'success');
         }
 
-        /**
-         * b) Export ke CSV (.csv) dengan UTF-8 BOM (\uFEFF) agar rapi di Excel
-         */
         function exportToCSV() {
             const { rows, baseFileName } = buildAuditExportDataset();
             if (rows.length === 0) {
@@ -1175,16 +1607,12 @@
                 ].join('\r\n');
             }
 
-            // Tambahkan UTF-8 BOM (\uFEFF) agar Excel membaca karakter & kolom dengan benar
             const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
             triggerDownload(blob, `${baseFileName}.csv`);
             closeModal('exportModal');
             showToast(`Berhasil mengunduh ${baseFileName}.csv`, 'success');
         }
 
-        /**
-         * c) Export ke JSON (.json) terstruktur lengkap
-         */
         function exportToJSON() {
             const { rows, summary, baseFileName } = buildAuditExportDataset();
             const payload = {
@@ -1213,26 +1641,38 @@
         // =========================================================================
         function showLastScanBanner(item) {
             const card = document.getElementById('lastScannedCard');
+            if (!card) return;
             const st = getItemValidationStatus(item);
 
             card.className = `rounded-xl p-3 border transition-all scan-highlight ${st.cardBorder}`;
             card.classList.remove('hidden');
 
             const badge = document.getElementById('lastScanBadge');
-            badge.className = `px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase border ${st.badgeClass}`;
-            badge.textContent = st.label;
+            if (badge) {
+                badge.className = `px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase border ${st.badgeClass}`;
+                badge.textContent = st.label;
+            }
 
-            document.getElementById('lastScanCode').textContent = `PLU: ${item.plu || '-'} • Barcode: ${item.barcode || '-'}`;
-            document.getElementById('lastScanName').textContent = item.descp;
-            document.getElementById('lastScanDetail').textContent = item.isNewItem
-                ? `Qty Fisik Tercatat: ${item.qty_fisik} ${item.sat1}`
-                : `Qty Fisik: ${item.qty_fisik} ${item.sat1}  |  Target LPB: ${item.qty_rec} ${item.sat1}`;
+            const codeEl = document.getElementById('lastScanCode');
+            if (codeEl) codeEl.textContent = `PLU: ${item.plu || '-'} • Barcode: ${item.barcode || '-'}`;
+
+            const nameEl = document.getElementById('lastScanName');
+            if (nameEl) nameEl.textContent = item.descp;
+
+            const detailEl = document.getElementById('lastScanDetail');
+            if (detailEl) {
+                detailEl.textContent = item.isNewItem
+                    ? `Qty Fisik Tercatat: ${item.qty_fisik} ${item.sat1}`
+                    : `Qty Fisik: ${item.qty_fisik} ${item.sat1}  |  Target LPB: ${item.qty_rec} ${item.sat1}`;
+            }
 
             const actions = document.getElementById('lastScanActions');
-            actions.innerHTML = `
-                <button type="button" onclick="adjustItemQty('${item.uid}', 1)" class="px-2.5 py-1.5 rounded-lg bg-slate-900 text-white text-xs font-bold active:scale-95">+1</button>
-                ${item.isi2 > 1 ? `<button type="button" onclick="adjustItemQty('${item.uid}', ${item.isi2})" class="px-2.5 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-bold active:scale-95">+1 ${item.sat2 || 'CRT'} (${item.isi2})</button>` : ''}
-            `;
+            if (actions) {
+                actions.innerHTML = `
+                    <button type="button" onclick="adjustItemQty('${item.uid}', 1)" class="px-2.5 py-1.5 rounded-lg bg-slate-900 text-white text-xs font-bold active:scale-95">+1</button>
+                    ${item.isi2 > 1 ? `<button type="button" onclick="adjustItemQty('${item.uid}', ${item.isi2})" class="px-2.5 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-bold active:scale-95">+1 ${item.sat2 || 'CRT'} (${item.isi2})</button>` : ''}
+                `;
+            }
         }
 
         function setFilterStatus(statusKey) {
@@ -1240,17 +1680,12 @@
             renderAll();
         }
 
-        function renderAll() {
-            // Update Header Info
-            const firstRec = state.receivingItems[0];
-            if (firstRec) {
-                document.getElementById('storeCodeBadge').textContent = firstRec.kd_store || 'STORE';
-                document.getElementById('lpbSubheader').textContent = firstRec.no_lpb
-                    ? `LPB: ${firstRec.no_lpb} • ${firstRec.nama_supp || firstRec.nama_store}`
-                    : `${state.receivingItems.length} item siap diperiksa`;
-            }
+        function setTextIfExists(id, text) {
+            const el = document.getElementById(id);
+            if (el) el.textContent = text;
+        }
 
-            // Hitung Statistik 5 Kategori
+        function updateSummaryCountersOnly() {
             let sesuai = 0, kurang = 0, lebih = 0, tidakAda = 0, baru = 0, pending = 0;
             state.receivingItems.forEach(item => {
                 const st = getItemValidationStatus(item).key;
@@ -1262,38 +1697,52 @@
                 else pending++;
             });
 
-            document.getElementById('countSesuai').textContent = sesuai;
-            document.getElementById('countKurang').textContent = kurang;
-            document.getElementById('countLebih').textContent = lebih;
-            document.getElementById('countTidakAda').textContent = tidakAda;
-            document.getElementById('countBaru').textContent = baru;
-            document.getElementById('countAll').textContent = state.receivingItems.length;
-            document.getElementById('countPending').textContent = pending;
+            setTextIfExists('countSesuai', sesuai);
+            setTextIfExists('countKurang', kurang);
+            setTextIfExists('countLebih', lebih);
+            setTextIfExists('countTidakAda', tidakAda);
+            setTextIfExists('countBaru', baru);
+            setTextIfExists('countAll', state.receivingItems.length);
+            setTextIfExists('countPending', pending);
+        }
 
-            // Update tombol Selesaikan / Buka Kembali Sesi
+        function renderAll() {
+            const firstRec = state.receivingItems[0];
+            if (firstRec) {
+                setTextIfExists('storeCodeBadge', firstRec.kd_store || 'STORE');
+                setTextIfExists('lpbSubheader', firstRec.no_lpb
+                    ? `LPB: ${firstRec.no_lpb} • ${firstRec.nama_supp || firstRec.nama_store}`
+                    : `${state.receivingItems.length} item siap diperiksa`);
+            }
+
+            updateSummaryCountersOnly();
+
             const finishBtn = document.getElementById('finishAuditBtn');
             const finishLabel = document.getElementById('finishAuditLabel');
             const auditStatusText = document.getElementById('auditStatusText');
 
-            if (state.isAuditFinished) {
-                finishBtn.className = 'flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-4 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold shadow-xs transition-all';
-                finishLabel.textContent = 'Buka Kembali Sesi';
-                auditStatusText.textContent = 'Sesi Selesai (Item 0 = Tidak Ada)';
-                auditStatusText.className = 'text-[11px] font-bold text-rose-600';
-            } else {
-                finishBtn.className = 'flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-4 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-xs transition-all';
-                finishLabel.textContent = 'Selesaikan Pengecekan';
-                auditStatusText.textContent = 'Sesi Pengecekan Berjalan';
-                auditStatusText.className = 'text-[11px] font-semibold text-amber-600';
+            if (finishBtn && finishLabel && auditStatusText) {
+                if (state.isAuditFinished) {
+                    finishBtn.className = 'flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-4 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold shadow-2xs transition-all';
+                    finishLabel.textContent = 'Buka Kembali Sesi';
+                    auditStatusText.textContent = 'Sesi Selesai (Item 0 = Tidak Ada)';
+                    auditStatusText.className = 'text-[11px] font-bold text-rose-600';
+                } else {
+                    finishBtn.className = 'flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-4 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-2xs transition-all';
+                    finishLabel.textContent = 'Selesaikan Pengecekan';
+                    auditStatusText.textContent = 'Sesi Pengecekan Berjalan';
+                    auditStatusText.className = 'text-[11px] font-semibold text-amber-600';
+                }
             }
 
-            // Filter daftar item
             const filtered = state.receivingItems.filter(item => {
                 if (state.filterStatus === 'all') return true;
                 return getItemValidationStatus(item).key === state.filterStatus;
             });
 
             const container = document.getElementById('itemsContainer');
+            if (!container) return;
+
             if (filtered.length === 0) {
                 container.innerHTML = `
                     <div class="bg-white rounded-2xl border border-slate-200 p-8 text-center text-xs text-slate-500">
@@ -1311,11 +1760,11 @@
                     : (diff === 0 ? 'Pas (0)' : (diff > 0 ? `+${diff}` : `${diff}`));
 
                 return `
-                    <div class="rounded-2xl border p-3.5 transition-all shadow-2xs ${st.cardBorder}">
+                    <div data-item-card="${item.uid}" class="rounded-2xl border p-3.5 transition-all shadow-2xs ${st.cardBorder}">
                         <div class="flex items-start justify-between gap-2">
                             <div class="min-w-0 flex-1">
                                 <div class="flex items-center gap-1.5 flex-wrap">
-                                    <span class="px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase border ${st.badgeClass}">
+                                    <span data-status-badge class="px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase border ${st.badgeClass}">
                                         ${st.label}
                                     </span>
                                     <span class="font-mono text-[11px] font-semibold text-slate-600 bg-white/80 px-1.5 py-0.5 rounded border border-slate-200/80">
@@ -1338,7 +1787,6 @@
                             ` : ''}
                         </div>
 
-                        <!-- Bar Kontrol Kuantitas Fisik vs LPB -->
                         <div class="mt-3 pt-2.5 border-t border-slate-200/70 flex flex-wrap items-center justify-between gap-2">
                             <div class="flex items-center gap-3 text-xs">
                                 ${!item.isNewItem ? `
@@ -1350,11 +1798,10 @@
                                 ` : ''}
                                 <div>
                                     <span class="text-[10px] text-slate-500 block">Selisih</span>
-                                    <span class="font-mono font-bold ${st.qtyColor}">${diffLabel}</span>
+                                    <span data-diff-label class="font-mono font-bold ${st.qtyColor}">${diffLabel}</span>
                                 </div>
                             </div>
 
-                            <!-- Stepper Input Qty Fisik + Tombol Cepat +1 Karton -->
                             <div class="flex items-center gap-1.5">
                                 ${item.isi2 > 1 ? `
                                     <button type="button" onclick="adjustItemQty('${item.uid}', ${item.isi2})"
@@ -1368,9 +1815,13 @@
                                             class="w-8 h-8 flex items-center justify-center text-slate-600 hover:bg-slate-100 active:bg-slate-200 font-bold">
                                         <i class="fas fa-minus text-[10px]"></i>
                                     </button>
-                                    <input type="number" min="0" value="${item.qty_fisik}"
-                                           onchange="setDirectItemQty('${item.uid}', this.value)"
-                                           class="w-12 h-8 text-center font-mono text-xs sm:text-sm font-extrabold ${st.qtyColor} focus:outline-none">
+                                    <input type="number" min="0" inputmode="numeric" value="${item.qty_fisik}"
+                                           data-prev-qty="${item.qty_fisik}"
+                                           onfocus="this.dataset.prevQty=this.value; this.select();"
+                                           oninput="handleLiveManualQtyInput('${item.uid}', this.value, this)"
+                                           onblur="finalizeManualQtyEdit('${item.uid}', this)"
+                                           onkeydown="if(event.key==='Enter'){ event.preventDefault(); this.blur(); }"
+                                           class="w-14 h-8 text-center font-mono text-xs sm:text-sm font-extrabold ${st.qtyColor} focus:outline-none focus:bg-indigo-50/40">
                                     <button type="button" onclick="adjustItemQty('${item.uid}', 1)"
                                             class="w-8 h-8 flex items-center justify-center text-slate-700 hover:bg-slate-100 active:bg-slate-200 font-bold">
                                         <i class="fas fa-plus text-[10px]"></i>
@@ -1399,7 +1850,7 @@
 
         async function syncFromGithub(silent = false) {
             const syncIcon = document.getElementById('syncIcon');
-            syncIcon.classList.add('fa-spin');
+            if (syncIcon) syncIcon.classList.add('fa-spin');
 
             const rawMasterUrl = normalizeGithubRawUrl(state.masterUrl);
             const rawReceivedUrl = normalizeGithubRawUrl(state.receivedUrl);
@@ -1426,7 +1877,6 @@
                     throw new Error('Data received.json kosong.');
                 }
 
-                // Pertahankan qty_fisik yang sudah sempat di-scan jika PLU/Barcode sama
                 const prevQtyMap = new Map();
                 state.receivingItems.forEach(old => {
                     if (!old.isNewItem && old.qty_fisik > 0) {
@@ -1439,7 +1889,10 @@
                 const rebuilt = buildReceivingSession(receivedArr, masterArr);
                 rebuilt.forEach(item => {
                     const savedQty = prevQtyMap.get(`${item.plu}_${item.barcode}`);
-                    if (savedQty !== undefined) item.qty_fisik = savedQty;
+                    if (savedQty !== undefined) {
+                        item.qty_fisik = savedQty;
+                        item.hasBeenScanned = true;
+                    }
                 });
 
                 state.receivingItems = [...rebuilt, ...existingNewItems];
@@ -1455,7 +1908,7 @@
                     showToast('Gagal terhubung ke GitHub. Menggunakan data cache offline.', 'warning');
                 }
             } finally {
-                syncIcon.classList.remove('fa-spin');
+                if (syncIcon) syncIcon.classList.remove('fa-spin');
             }
         }
 
@@ -1494,7 +1947,6 @@
                     state.cameras = await Html5Qrcode.getCameras();
                 }
 
-                // Prioritaskan kamera belakang (environment)
                 let camConfig = { facingMode: 'environment' };
                 if (state.cameras.length > 0) {
                     const backIdx = state.cameras.findIndex(c => /back|rear|belakang|environment/i.test(c.label));
@@ -1522,7 +1974,6 @@
                     },
                     (decodedText) => {
                         const now = Date.now();
-                        // Cooldown 1.4 detik untuk mencegah double-scan tidak sengaja
                         if (decodedText === state.lastScanText && now - state.lastScanTimestamp < 1400) {
                             return;
                         }
@@ -1535,7 +1986,6 @@
 
                 state.isCameraRunning = true;
 
-                // Cek dukungan Senter / Torch
                 try {
                     const caps = state.html5QrCode.getRunningTrackCapabilities();
                     if (caps && caps.torch) {
@@ -1556,16 +2006,17 @@
         // 10. EVENT LISTENERS & INISIALISASI APLIKASI
         // =========================================================================
         document.addEventListener('DOMContentLoaded', async () => {
-            // 1. Muat Logo Toko dari IndexedDB
             const savedLogo = await idbGet('storeLogoDataUrl');
             if (savedLogo) {
                 const img = document.getElementById('storeLogoImg');
-                img.src = savedLogo;
-                img.classList.remove('hidden');
-                document.getElementById('logoPlaceholder').classList.add('hidden');
+                if (img) {
+                    img.src = savedLogo;
+                    img.classList.remove('hidden');
+                }
+                const ph = document.getElementById('logoPlaceholder');
+                if (ph) ph.classList.add('hidden');
             }
 
-            // 2. Muat Sesi dari IndexedDB atau Inisialisasi
             const savedSession = await idbGet('receivingSession');
             if (savedSession && Array.isArray(savedSession.receivingItems) && savedSession.receivingItems.length > 0) {
                 state.masterProducts = savedSession.masterProducts || FALLBACK_MASTER;
@@ -1574,7 +2025,6 @@
                 state.masterUrl = savedSession.masterUrl || DEFAULT_MASTER_URL;
                 state.receivedUrl = savedSession.receivedUrl || DEFAULT_RECEIVED_URL;
                 renderAll();
-                // Sinkronkan diam-diam di latar belakang jika online
                 if (navigator.onLine) syncFromGithub(true);
             } else {
                 state.masterProducts = FALLBACK_MASTER;
@@ -1583,10 +2033,20 @@
                 if (navigator.onLine) await syncFromGithub(true);
             }
 
-            document.getElementById('masterUrlInput').value = state.masterUrl;
-            document.getElementById('receivedUrlInput').value = state.receivedUrl;
+            const masterUrlEl = document.getElementById('masterUrlInput');
+            const receivedUrlEl = document.getElementById('receivedUrlInput');
+            if (masterUrlEl) masterUrlEl.value = state.masterUrl;
+            if (receivedUrlEl) receivedUrlEl.value = state.receivedUrl;
 
-            // Upload Logo Toko
+            const logDateFilter = document.getElementById('logDateFilter');
+            if (logDateFilter) {
+                logDateFilter.value = getTodayDateKey();
+                logDateFilter.addEventListener('change', () => {
+                    renderDailyScanLogs(logDateFilter.value);
+                });
+            }
+            await renderDailyScanLogs(getTodayDateKey());
+
             document.getElementById('logoInput').addEventListener('change', (e) => {
                 const file = e.target.files[0];
                 if (!file) return;
@@ -1603,7 +2063,6 @@
                 reader.readAsDataURL(file);
             });
 
-            // Form Scan Manual / Scanner Kasir USB-Bluetooth
             document.getElementById('manualScanForm').addEventListener('submit', (e) => {
                 e.preventDefault();
                 const input = document.getElementById('barcodeInput');
@@ -1614,7 +2073,6 @@
                 input.focus();
             });
 
-            // Form Simpan Item Baru
             document.getElementById('newItemForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const barcode = document.getElementById('newBarcode').value.trim();
@@ -1639,6 +2097,7 @@
                     descp,
                     qty_rec: 0,
                     qty_fisik: qty,
+                    hasBeenScanned: true,
                     sat1: satuan,
                     sat2: '',
                     isi2: 0,
@@ -1651,13 +2110,23 @@
                 state.receivingItems.unshift(newItem);
                 state.lastScannedId = newItem.uid;
                 await saveSessionToIDB();
+                await appendDailyScanLog({
+                    aksi: 'ITEM_BARU',
+                    kd_store: newItem.kd_store,
+                    plu: newItem.plu,
+                    barcode: newItem.barcode,
+                    descp: newItem.descp,
+                    qty_lpb: 0,
+                    qty_sebelum: 0,
+                    qty_sesudah: qty,
+                    status_validasi: 'Item Baru'
+                });
                 closeModal('newItemModal');
                 renderAll();
                 showLastScanBanner(newItem);
                 showToast(`Item baru "${descp}" ditambahkan.`, 'success');
             });
 
-            // Tombol Kamera, Senter, Switch Kamera
             document.getElementById('toggleCameraBtn').addEventListener('click', toggleCameraScanner);
 
             document.getElementById('switchCameraBtn').addEventListener('click', async () => {
@@ -1680,7 +2149,6 @@
                 }
             });
 
-            // Selesaikan Pengecekan (Mengubah item yang masih 0 menjadi "Barang Tidak Ada" merah)
             document.getElementById('finishAuditBtn').addEventListener('click', async () => {
                 state.isAuditFinished = !state.isAuditFinished;
                 await saveSessionToIDB();
@@ -1692,18 +2160,21 @@
                 }
             });
 
-            // Reset Qty Fisik
             document.getElementById('resetSessionBtn').addEventListener('click', async () => {
                 state.receivingItems = state.receivingItems.filter(i => !i.isNewItem);
-                state.receivingItems.forEach(i => { i.qty_fisik = 0; });
+                state.receivingItems.forEach(i => {
+                    i.qty_fisik = 0;
+                    i.hasBeenScanned = false;
+                });
                 state.isAuditFinished = false;
-                document.getElementById('lastScannedCard').classList.add('hidden');
+                const lastCard = document.getElementById('lastScannedCard');
+                if (lastCard) lastCard.classList.add('hidden');
                 await saveSessionToIDB();
                 renderAll();
+                closeModal('settingsModal');
                 showToast('Semua qty fisik telah direset ke 0.', 'info');
             });
 
-            // Tombol Sync, Settings, dan Export Modal
             document.getElementById('syncGithubBtn').addEventListener('click', () => syncFromGithub(false));
             document.getElementById('openSettingsBtn').addEventListener('click', () => openModal('settingsModal'));
             document.getElementById('openExportModalBtn').addEventListener('click', openExportModal);
@@ -1715,7 +2186,6 @@
                 await syncFromGithub(false);
             });
 
-            // Import Manual JSON Offline
             document.getElementById('importMasterFile').addEventListener('change', (e) => {
                 const file = e.target.files[0];
                 if (!file) return;
@@ -1753,9 +2223,9 @@
                 reader.readAsText(file);
             });
 
-            // Monitor Status Online/Offline
             function updateNetworkUI() {
                 const badge = document.getElementById('networkBadge');
+                if (!badge) return;
                 if (navigator.onLine) {
                     badge.className = 'inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200';
                     badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span><span class="hidden sm:inline">Online</span>';
