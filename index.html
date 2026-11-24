@@ -22,247 +22,224 @@
     <!-- SheetJS (XLSX) untuk Export Excel (.xlsx) dan CSV -->
     <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'monospace'],
-                    }
-                }
-            }
-        }
-    </script>
+    <!-- jsPDF & AutoTable untuk Export Laporan PDF Resmi -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 
     <style>
-        /* Styling kamera scanner agar tajam dan proporsional di layar HP */
-        #reader {
-            width: 100%;
-            border-radius: 1rem;
-            overflow: hidden;
-            background: #0f172a;
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #0f172a;
+        }
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
         }
         #reader video {
-            width: 100% !important;
-            height: auto !important;
             object-fit: cover !important;
-            border-radius: 1rem;
+            border-radius: 0.75rem;
         }
-
-        /* Animasi highlight saat item baru selesai di-scan */
         @keyframes pulseHighlight {
-            0% { transform: scale(1.015); box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.25); }
-            100% { transform: scale(1); box-shadow: none; }
+            0% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.4); }
+            70% { box-shadow: 0 0 0 8px rgba(79, 70, 229, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0); }
         }
         .scan-highlight {
-            animation: pulseHighlight 0.6s ease-out;
+            animation: pulseHighlight 1.2s ease-out;
         }
-
-        /* Styling khusus Social Footer sesuai permintaan */
         .social-footer-container {
+            margin-top: 2.5rem;
+            padding: 1.75rem 1rem 2rem;
             background: #ffffff;
             border-top: 1px solid #e2e8f0;
-            padding: 1.75rem 1rem 2rem;
-            margin-top: auto;
             text-align: center;
         }
         .social-footer-bar {
             display: flex;
-            flex-wrap: wrap;
             justify-content: center;
             align-items: center;
             gap: 0.75rem;
+            flex-wrap: wrap;
             margin-bottom: 1rem;
         }
         .social-icon {
             position: relative;
-            width: 2.5rem;
-            height: 2.5rem;
+            width: 38px;
+            height: 38px;
             border-radius: 9999px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            color: #ffffff;
-            font-size: 1rem;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            color: #475569;
+            background: #f1f5f9;
+            transition: all 0.2s ease;
             text-decoration: none;
         }
         .social-icon:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 14px rgba(15, 23, 42, 0.16);
+            transform: translateY(-2px);
+            color: #ffffff;
         }
+        .social-icon.linkedin:hover { background: #0a66c2; }
+        .social-icon.facebook:hover { background: #1877f2; }
+        .social-icon.instagram:hover { background: #e4405f; }
+        .social-icon.whatsapp:hover { background: #25d366; }
+        .social-icon.shopee:hover { background: #ee4d2d; }
+        .social-icon.tiktok:hover { background: #0f172a; }
         .social-icon .tooltip {
             position: absolute;
-            bottom: 125%;
+            bottom: 120%;
             left: 50%;
             transform: translateX(-50%);
             background: #0f172a;
             color: #ffffff;
-            font-size: 0.7rem;
+            font-size: 10px;
             font-weight: 600;
-            padding: 0.25rem 0.55rem;
-            border-radius: 0.375rem;
+            padding: 3px 7px;
+            border-radius: 6px;
             white-space: nowrap;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.2s ease;
+            transition: opacity 0.15s ease;
         }
         .social-icon:hover .tooltip {
             opacity: 1;
         }
-        .social-icon.linkedin { background: #0a66c2; }
-        .social-icon.facebook { background: #1877f2; }
-        .social-icon.instagram { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); }
-        .social-icon.whatsapp { background: #25d366; }
-        .social-icon.shopee { background: #ee4d2d; }
-        .social-icon.tiktok { background: #0f172a; }
-
         .footer-credits {
-            font-size: 0.78rem;
+            font-size: 12px;
             color: #64748b;
-            line-height: 1.5;
         }
     </style>
 </head>
-<body class="bg-slate-100 text-slate-800 antialiased min-h-screen flex flex-col selection:bg-indigo-100 selection:text-indigo-900">
+<body class="min-h-screen flex flex-col">
 
-    <!-- Top App Bar dengan Upload Logo Toko di Kiri Atas -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-2xs">
-        <div class="max-w-3xl mx-auto px-3 sm:px-5 h-16 flex items-center justify-between gap-2">
-            <!-- Kiri Atas: Slot Upload Logo Toko + Judul -->
+    <!-- Toast Notification Banner -->
+    <div id="toastBanner" class="hidden fixed top-18 left-1/2 -translate-x-1/2 z-50 max-w-md w-[92%] rounded-2xl px-4 py-3 shadow-lg border text-xs font-semibold flex items-center justify-between gap-3 transition-all">
+        <div class="flex items-center gap-2.5 min-w-0">
+            <i id="toastIcon" class="fas fa-info-circle text-base"></i>
+            <span id="toastText" class="truncate">Notifikasi</span>
+        </div>
+        <button type="button" onclick="hideToast()" class="opacity-80 hover:opacity-100">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <!-- Header Top Bar -->
+    <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-xs border-b border-slate-200">
+        <div class="max-w-3xl mx-auto px-3 sm:px-4 h-15 flex items-center justify-between gap-2">
+            <!-- Kiri: Upload Logo + Info Store -->
             <div class="flex items-center gap-2.5 min-w-0">
-                <label for="logoInput" title="Klik untuk upload/ganti logo toko"
-                       class="relative w-11 h-11 rounded-xl border-2 border-dashed border-slate-300 hover:border-indigo-500 bg-slate-50 flex items-center justify-center cursor-pointer overflow-hidden shrink-0 group transition-all">
-                    <input type="file" id="logoInput" accept="image/*" class="hidden">
-                    <img id="storeLogoImg" src="" alt="Logo Toko" class="hidden w-full h-full object-contain p-0.5">
-                    <div id="logoPlaceholder" class="flex flex-col items-center justify-center text-slate-400 group-hover:text-indigo-600 text-center px-0.5">
-                        <i class="fas fa-store text-xs"></i>
-                        <span class="text-[8px] font-bold leading-tight mt-0.5">LOGO</span>
+                <label for="logoInput" title="Klik untuk upload logo toko"
+                       class="w-10 h-10 rounded-xl border border-dashed border-slate-300 bg-slate-50 hover:bg-indigo-50 hover:border-indigo-400 flex items-center justify-center cursor-pointer overflow-hidden shrink-0 transition-all">
+                    <img id="storeLogoImg" src="" alt="Logo Toko" class="hidden w-full h-full object-contain">
+                    <div id="logoPlaceholder" class="text-center leading-none">
+                        <i class="fas fa-store text-slate-400 text-xs"></i>
+                        <span class="block text-[8px] font-bold text-slate-400 mt-0.5">LOGO</span>
                     </div>
+                    <input type="file" id="logoInput" accept="image/*" class="hidden">
                 </label>
 
                 <div class="min-w-0">
                     <div class="flex items-center gap-1.5">
-                        <h1 class="text-sm sm:text-base font-extrabold text-slate-900 truncate tracking-tight">Receiving Validator</h1>
-                        <span id="storeCodeBadge" class="px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200 font-mono text-[10px] font-bold shrink-0">AM024</span>
-                        <span id="activeOperatorBadge" onclick="openOperatorLoginModal()" title="Klik untuk ganti penginput"
-                              class="cursor-pointer px-2 py-0.5 rounded-full bg-slate-100 hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 border border-slate-200 text-[10px] font-bold truncate max-w-[110px]">
-                            <i class="fas fa-user-check mr-1"></i><span id="operatorNameLabel">Belum Login</span>
-                        </span>
+                        <span id="storeCodeBadge" class="px-1.5 py-0.5 rounded bg-slate-900 text-white font-mono text-[10px] font-bold">AM024</span>
+                        <h1 class="text-xs sm:text-sm font-extrabold text-slate-900 truncate">Receiving Validator</h1>
                     </div>
-                    <p id="lpbSubheader" class="text-[11px] text-slate-500 truncate">Memuat data penerimaan...</p>
+                    <p id="lpbSubheader" class="text-[11px] text-slate-500 truncate">Memuat data LPB...</p>
                 </div>
             </div>
 
-            <!-- Kanan Atas: Status Koneksi, Sync GitHub, Export & Settings -->
+            <!-- Kanan: Login Penginput, Status, Sync, Export, Settings -->
             <div class="flex items-center gap-1.5 shrink-0">
+                <button type="button" onclick="openOperatorLoginModal()" title="Ganti Penginput / Sesi"
+                        class="inline-flex items-center gap-1 px-2 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-[11px] font-bold">
+                    <i class="fas fa-user-check"></i>
+                    <span id="operatorNameLabel" class="max-w-[70px] truncate">LOGIN</span>
+                </button>
+
                 <span id="networkBadge" class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                     <span class="hidden sm:inline">Online</span>
                 </span>
 
-                <button id="syncGithubBtn" type="button" title="Sinkronkan ulang dari GitHub"
-                        class="p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs transition-all active:scale-95">
+                <button id="syncGithubBtn" type="button" title="Sinkronkan dari GitHub"
+                        class="p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs">
                     <i id="syncIcon" class="fas fa-sync-alt"></i>
                 </button>
 
-                <button id="openExportModalBtn" type="button" title="Export Laporan Excel, CSV & JSON"
-                        class="inline-flex items-center gap-1.5 px-2.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-2xs transition-all active:scale-95">
+                <button id="openExportModalBtn" type="button"
+                        class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-2xs">
                     <i class="fas fa-file-export"></i>
                     <span class="hidden sm:inline">Export</span>
                 </button>
 
-                <button id="openOperatorBtnTop" type="button" onclick="openOperatorLoginModal()" title="Login / Ganti Penginput"
-                        class="p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs transition-all active:scale-95">
-                    <i class="fas fa-user-shield"></i>
-                </button>
-
-                <button id="openSettingsBtn" type="button" title="Pengaturan Link GitHub & Import JSON"
-                        class="p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs transition-all active:scale-95">
+                <button id="openSettingsBtn" type="button" title="Pengaturan"
+                        class="p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs">
                     <i class="fas fa-cog"></i>
                 </button>
             </div>
         </div>
     </header>
 
-    <!-- Toast Notification -->
-    <div id="toastBanner" class="hidden fixed top-18 left-1/2 -translate-x-1/2 z-50 max-w-md w-[92%] rounded-2xl px-4 py-3 shadow-lg border text-xs font-semibold flex items-center justify-between gap-3 transition-all">
-        <div class="flex items-center gap-2.5">
-            <i id="toastIcon" class="fas fa-info-circle text-base"></i>
-            <span id="toastText">Notifikasi</span>
-        </div>
-        <button type="button" onclick="hideToast()" class="opacity-75 hover:opacity-100">
-            <i class="fas fa-times"></i>
-        </button>
-    </div>
+    <!-- Main Workspace -->
+    <main class="flex-1 max-w-3xl w-full mx-auto px-3 sm:px-4 py-3.5 space-y-3.5">
 
-    <!-- Main Container -->
-    <main class="flex-grow max-w-3xl w-full mx-auto px-3 sm:px-5 py-4 space-y-4">
-
-        <!-- ======================================================================= -->
-        <!-- BAGIAN 1: SCANNER BARCODE (DI SEBELAH ATAS APLIKASI)                    -->
-        <!-- ======================================================================= -->
-        <section class="bg-white rounded-2xl border border-slate-200 shadow-xs p-4 space-y-3">
+        <!-- BAGIAN 1: SCANNER BARCODE (KAMERA + MANUAL / USB SCANNER) -->
+        <section class="bg-white rounded-2xl border border-slate-200 shadow-xs p-3.5 space-y-3">
             <div class="flex items-center justify-between gap-2">
                 <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-2xs">
+                    <div class="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center">
                         <i class="fas fa-barcode text-sm"></i>
                     </div>
                     <div>
-                        <h2 class="text-xs sm:text-sm font-bold text-slate-900">Scanner Penerimaan Barang</h2>
-                        <p class="text-[11px] text-slate-500">Gunakan kamera HP atau tembak scanner kasir</p>
+                        <h2 class="text-xs sm:text-sm font-extrabold text-slate-900">Scanner Penerimaan Barang</h2>
+                        <p class="text-[11px] text-slate-500">Kamera HP HD atau Scanner Kasir USB/Bluetooth</p>
                     </div>
                 </div>
 
                 <div class="flex items-center gap-1.5">
-                    <button id="toggleTorchBtn" type="button" title="Nyalakan/Matikan Senter"
-                            class="hidden px-2.5 py-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-amber-50 text-slate-700 text-xs font-semibold transition-all">
-                        <i class="fas fa-bolt text-amber-500"></i>
+                    <button id="toggleTorchBtn" type="button" title="Senter / Flash"
+                            class="hidden p-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 text-xs">
+                        <i class="fas fa-bolt"></i>
                     </button>
                     <button id="switchCameraBtn" type="button" title="Ganti Kamera"
-                            class="hidden px-2.5 py-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-semibold transition-all">
+                            class="hidden p-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 text-xs">
                         <i class="fas fa-camera-rotate"></i>
                     </button>
                     <button id="toggleCameraBtn" type="button"
-                            class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-2xs transition-all active:scale-95">
+                            class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-2xs transition-all">
                         <i id="cameraBtnIcon" class="fas fa-video"></i>
                         <span id="cameraBtnText">Buka Kamera</span>
                     </button>
                 </div>
             </div>
 
-            <!-- Viewport Kamera HD (Tersembunyi hingga tombol Buka Kamera ditekan) -->
-            <div id="cameraWrapper" class="hidden relative">
-                <div id="reader"></div>
-                <p class="text-[11px] text-center text-slate-500 mt-1.5">
-                    Arahkan garis merah/kotak bidik ke barcode kemasan (HD Autofocus aktif)
-                </p>
+            <!-- Viewport Kamera -->
+            <div id="cameraWrapper" class="hidden overflow-hidden rounded-xl border border-slate-300 bg-slate-950">
+                <div id="reader" class="w-full"></div>
             </div>
 
-            <!-- Input Barcode Cepat (Mendukung USB/Bluetooth Scanner & Ketik Manual) -->
+            <!-- Input Barcode Manual / Hardware Scanner -->
             <form id="manualScanForm" class="flex items-center gap-2">
                 <div class="relative flex-1">
-                    <i class="fas fa-qrcode text-slate-400 text-xs absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+                    <i class="fas fa-qrcode text-slate-400 text-xs absolute left-3 top-1/2 -translate-y-1/2"></i>
                     <input type="text" id="barcodeInput" autocomplete="off"
-                           placeholder="Scan barcode / ketik PLU lalu tekan Enter..."
-                           class="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white text-xs sm:text-sm font-mono font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/25 focus:border-indigo-500 transition-all">
+                           placeholder="Scan atau ketik Barcode / PLU lalu Enter..."
+                           class="w-full pl-8 pr-3 py-2.5 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white font-mono text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/25 focus:border-indigo-500">
                 </div>
                 <button type="submit"
-                        class="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-all active:scale-95 shrink-0">
+                        class="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shrink-0">
                     Cek
                 </button>
             </form>
 
-            <!-- Kartu Hasil Scan Terakhir -->
+            <!-- Banner Hasil Scan Terakhir -->
             <div id="lastScannedCard" class="hidden rounded-xl p-3 border transition-all">
                 <div class="flex items-start justify-between gap-2">
-                    <div class="min-w-0 flex-1">
+                    <div class="min-w-0">
                         <div class="flex items-center gap-1.5 flex-wrap">
                             <span id="lastScanBadge" class="px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase border">Status</span>
                             <span id="lastScanCode" class="font-mono text-[11px] text-slate-600"></span>
                         </div>
-                        <p id="lastScanName" class="text-xs sm:text-sm font-bold text-slate-900 truncate mt-1"></p>
+                        <p id="lastScanName" class="text-xs font-extrabold text-slate-900 truncate mt-1"></p>
                         <p id="lastScanDetail" class="text-[11px] text-slate-600 mt-0.5"></p>
                     </div>
                     <div id="lastScanActions" class="flex items-center gap-1.5 shrink-0"></div>
@@ -270,52 +247,46 @@
             </div>
         </section>
 
-        <!-- ======================================================================= -->
-        <!-- BAGIAN 2: RINGKASAN 5 STATUS VALIDASI & AKSI SESI                       -->
-        <!-- ======================================================================= -->
+        <!-- BAGIAN 2: RINGKASAN STATUS & KONTROL SESI -->
         <section class="bg-white rounded-2xl border border-slate-200 shadow-xs p-3.5 space-y-3">
-            <div class="grid grid-cols-5 gap-1.5 text-center">
-                <button type="button" onclick="setFilterStatus('sesuai')"
-                        class="p-2 rounded-xl border border-emerald-200 bg-emerald-50/80 hover:bg-emerald-100/80 transition-all">
-                    <span id="countSesuai" class="block text-base sm:text-lg font-extrabold text-emerald-700 font-mono">0</span>
-                    <span class="block text-[10px] font-bold text-emerald-800 leading-tight mt-0.5">Sesuai</span>
+            <div class="grid grid-cols-3 sm:grid-cols-6 gap-1.5 text-center">
+                <button type="button" onclick="setFilterStatus('all')" class="p-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200">
+                    <span class="block text-[10px] font-bold text-slate-500">SEMUA</span>
+                    <span id="countAll" class="font-mono text-sm font-extrabold text-slate-900">0</span>
                 </button>
-                <button type="button" onclick="setFilterStatus('kurang')"
-                        class="p-2 rounded-xl border border-amber-200 bg-amber-50/80 hover:bg-amber-100/80 transition-all">
-                    <span id="countKurang" class="block text-base sm:text-lg font-extrabold text-amber-700 font-mono">0</span>
-                    <span class="block text-[10px] font-bold text-amber-800 leading-tight mt-0.5">Kurang</span>
+                <button type="button" onclick="setFilterStatus('sesuai')" class="p-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200">
+                    <span class="block text-[10px] font-bold text-emerald-700">SESUAI</span>
+                    <span id="countSesuai" class="font-mono text-sm font-extrabold text-emerald-800">0</span>
                 </button>
-                <button type="button" onclick="setFilterStatus('lebih')"
-                        class="p-2 rounded-xl border border-orange-200 bg-orange-50/80 hover:bg-orange-100/80 transition-all">
-                    <span id="countLebih" class="block text-base sm:text-lg font-extrabold text-orange-700 font-mono">0</span>
-                    <span class="block text-[10px] font-bold text-orange-800 leading-tight mt-0.5">Lebih</span>
+                <button type="button" onclick="setFilterStatus('kurang')" class="p-2 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200">
+                    <span class="block text-[10px] font-bold text-amber-700">KURANG</span>
+                    <span id="countKurang" class="font-mono text-sm font-extrabold text-amber-800">0</span>
                 </button>
-                <button type="button" onclick="setFilterStatus('tidak_ada')"
-                        class="p-2 rounded-xl border border-rose-200 bg-rose-50/80 hover:bg-rose-100/80 transition-all">
-                    <span id="countTidakAda" class="block text-base sm:text-lg font-extrabold text-rose-700 font-mono">0</span>
-                    <span class="block text-[10px] font-bold text-rose-800 leading-tight mt-0.5">Tdk Ada</span>
+                <button type="button" onclick="setFilterStatus('lebih')" class="p-2 rounded-xl bg-orange-50 hover:bg-orange-100 border border-orange-200">
+                    <span class="block text-[10px] font-bold text-orange-700">LEBIH</span>
+                    <span id="countLebih" class="font-mono text-sm font-extrabold text-orange-800">0</span>
                 </button>
-                <button type="button" onclick="setFilterStatus('baru')"
-                        class="p-2 rounded-xl border border-indigo-200 bg-indigo-50/80 hover:bg-indigo-100/80 transition-all">
-                    <span id="countBaru" class="block text-base sm:text-lg font-extrabold text-indigo-700 font-mono">0</span>
-                    <span class="block text-[10px] font-bold text-indigo-800 leading-tight mt-0.5">Item Baru</span>
+                <button type="button" onclick="setFilterStatus('tidak_ada')" class="p-2 rounded-xl bg-rose-50 hover:bg-rose-100 border border-rose-200">
+                    <span class="block text-[10px] font-bold text-rose-700">TDK ADA</span>
+                    <span id="countTidakAda" class="font-mono text-sm font-extrabold text-rose-800">0</span>
+                </button>
+                <button type="button" onclick="setFilterStatus('baru')" class="p-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 border border-indigo-200">
+                    <span class="block text-[10px] font-bold text-indigo-700">BARU</span>
+                    <span id="countBaru" class="font-mono text-sm font-extrabold text-indigo-800">0</span>
                 </button>
             </div>
 
-            <!-- Bar Filter & Tombol Selesaikan Pengecekan -->
-            <div class="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-slate-100">
+            <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100">
                 <div class="flex items-center gap-1.5 text-xs">
-                    <button type="button" onclick="setFilterStatus('all')"
-                            class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold">
-                        Semua (<span id="countAll">0</span>)
-                    </button>
-                    <button type="button" onclick="setFilterStatus('pending')"
-                            class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium">
-                        Belum (<span id="countPending">0</span>)
-                    </button>
+                    <span class="text-slate-500">Pending: <strong id="countPending" class="font-mono text-slate-800">0</strong></span>
                     <button type="button" onclick="openNewItemModal()"
                             class="px-2.5 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold">
                         + Item Baru
+                    </button>
+                    <button type="button" onclick="openEvidenceModal('SESSION_GENERAL')"
+                            class="px-2.5 py-1.5 rounded-lg bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 font-semibold inline-flex items-center gap-1">
+                        <i class="fas fa-camera"></i>
+                        <span>Bukti Sesi (<span id="sessionEvidenceCount">0</span>)</span>
                     </button>
                 </div>
 
@@ -564,6 +535,12 @@
             </div>
 
             <div class="space-y-2">
+                <button type="button" onclick="exportToPDF()"
+                        class="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-2xs transition-all">
+                    <span class="flex items-center gap-2"><i class="fas fa-file-pdf text-base"></i> Export Berita Acara PDF (.pdf)</span>
+                    <span class="text-[10px] bg-rose-700 px-2 py-0.5 rounded">Siap Cetak & TTD</span>
+                </button>
+
                 <button type="button" onclick="exportToExcel()"
                         class="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-2xs transition-all">
                     <span class="flex items-center gap-2"><i class="fas fa-file-excel text-base"></i> Export Microsoft Excel (.xlsx)</span>
@@ -581,6 +558,69 @@
                     <span class="flex items-center gap-2"><i class="fas fa-code text-base text-indigo-600"></i> Export JSON (.json)</span>
                     <span class="text-[10px] bg-slate-100 px-2 py-0.5 rounded">Backup</span>
                 </button>
+
+                <button type="button" onclick="composeHeadOfficeEmail()"
+                        class="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-2xs transition-all">
+                    <span class="flex items-center gap-2"><i class="fas fa-envelope-open-text text-base"></i> Siapkan Email ke Kantor Pusat</span>
+                    <span class="text-[10px] bg-indigo-700 px-2 py-0.5 rounded">Link Bukti</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ======================================================================= -->
+    <!-- MODAL 3B: DOKUMENTASI FOTO & VIDEO BUKTI (GOOGLE DRIVE + OFFLINE IDB)   -->
+    <!-- ======================================================================= -->
+    <div id="evidenceModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-xl max-w-md w-full p-5 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-start justify-between gap-2">
+                <div class="min-w-0">
+                    <h3 class="text-sm font-extrabold text-slate-900">Dokumentasi Foto & Video Bukti</h3>
+                    <p id="evidenceTargetTitle" class="text-[11px] text-indigo-600 font-semibold truncate mt-0.5">Sesi Penerimaan</p>
+                </div>
+                <button type="button" onclick="closeModal('evidenceModal')" class="p-1.5 text-slate-400 hover:text-slate-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+                <label class="flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl border-2 border-dashed border-sky-300 bg-sky-50/70 hover:bg-sky-100/70 text-sky-800 text-xs font-bold cursor-pointer transition-all text-center">
+                    <i class="fas fa-camera text-lg text-sky-600"></i>
+                    <span>Ambil / Pilih Foto</span>
+                    <span class="text-[10px] font-normal text-sky-600">Kompresi Otomatis</span>
+                    <input type="file" id="evidencePhotoInput" accept="image/*" capture="environment" class="hidden">
+                </label>
+
+                <label class="flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl border-2 border-dashed border-indigo-300 bg-indigo-50/70 hover:bg-indigo-100/70 text-indigo-800 text-xs font-bold cursor-pointer transition-all text-center">
+                    <i class="fas fa-video text-lg text-indigo-600"></i>
+                    <span>Rekam / Pilih Video</span>
+                    <span class="text-[10px] font-normal text-indigo-600">Bukti Kondisi Fisik</span>
+                    <input type="file" id="evidenceVideoInput" accept="video/*" capture="environment" class="hidden">
+                </label>
+            </div>
+
+            <div>
+                <label for="evidenceNoteInput" class="block text-[11px] font-bold text-slate-700 mb-1">Keterangan Kondisi Barang / Kemasan</label>
+                <input type="text" id="evidenceNoteInput" placeholder="Contoh: Dus penyok 2 karton / segel terbuka..."
+                       class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:outline-none focus:border-indigo-500">
+            </div>
+
+            <div id="evidenceUploadStatus" class="hidden rounded-xl p-2.5 bg-amber-50 border border-amber-200 text-amber-800 text-[11px] font-semibold flex items-center gap-2">
+                <i class="fas fa-spinner fa-spin"></i>
+                <span id="evidenceUploadStatusText">Memproses & mengunggah ke Google Drive...</span>
+            </div>
+
+            <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                    <span class="text-[11px] font-bold text-slate-700">Daftar Bukti Tersimpan (<span id="evidenceListCount">0</span>)</span>
+                    <button type="button" onclick="syncPendingEvidencesToDrive()"
+                            class="text-[11px] font-bold text-indigo-600 hover:underline">
+                        <i class="fas fa-cloud-upload-alt mr-1"></i>Sync ke Drive
+                    </button>
+                </div>
+                <div id="evidenceGalleryList" class="space-y-2 max-h-56 overflow-y-auto pr-1">
+                    <!-- Galeri foto/video bukti dirender di sini -->
+                </div>
             </div>
         </div>
     </div>
@@ -608,9 +648,45 @@
                     <input type="url" id="receivedUrlInput"
                            class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-mono">
                 </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-700 mb-1">Email Tujuan Kantor Pusat</label>
+                    <input type="email" id="hqEmailInput" placeholder="audit.receiving@perusahaan.co.id"
+                           class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-mono">
+                </div>
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="block text-[11px] font-bold text-slate-700">Webhook Google Apps Script (Auto-Upload Drive)</label>
+                        <button type="button" onclick="toggleAppsScriptGuide()" class="text-[10px] font-bold text-indigo-600 hover:underline">
+                            Lihat Script Drive
+                        </button>
+                    </div>
+                    <input type="url" id="driveWebhookUrlInput" placeholder="https://script.google.com/macros/s/.../exec"
+                           class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-mono">
+                    <div id="appsScriptGuideBox" class="hidden mt-2 p-2.5 rounded-xl bg-slate-900 text-slate-100 text-[10px] space-y-1.5">
+                        <p class="text-slate-300">1. Buka <strong>script.google.com</strong> → Buat Project Baru → Tempel kode di bawah → <strong>Deploy as Web App (Anyone)</strong>:</p>
+                        <pre id="appsScriptCodeSample" class="overflow-x-auto font-mono text-[9px] text-emerald-300 bg-slate-950 p-2 rounded-lg">function doPost(e) {
+  var data = JSON.parse(e.postData.contents);
+  var folderName = "Receiving_" + (data.kd_store || "STORE") + "_" + (data.tanggal || "LOG");
+  var folders = DriveApp.getFoldersByName(folderName);
+  var folder = folders.hasNext() ? folders.next() : DriveApp.createFolder(folderName);
+  var bytes = Utilities.base64Decode(data.base64Data);
+  var blob = Utilities.newBlob(bytes, data.mimeType, data.fileName);
+  var file = folder.createFile(blob);
+  file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+  return ContentService.createTextOutput(JSON.stringify({
+    status: "ok",
+    fileUrl: file.getUrl(),
+    folderUrl: folder.getUrl()
+  })).setMimeType(ContentService.MimeType.JSON);
+}</pre>
+                        <button type="button" onclick="copyAppsScriptCode()" class="px-2.5 py-1 rounded bg-indigo-600 text-white font-bold">
+                            Salin Kode Apps Script
+                        </button>
+                    </div>
+                </div>
                 <button id="saveAndSyncUrlBtn" type="button"
                         class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-all">
-                    Simpan & Sinkronkan URL
+                    Simpan & Sinkronkan Pengaturan
                 </button>
             </div>
 
@@ -883,6 +959,10 @@
             },
             masterProducts: [],
             receivingItems: [],
+            evidences: [],
+            activeEvidenceTargetUid: 'SESSION_GENERAL',
+            hqEmail: '',
+            driveWebhookUrl: '',
             isAuditFinished: false,
             filterStatus: 'all',
             lastScannedId: null,
@@ -1019,7 +1099,7 @@
 
         function openReceivingDB() {
             return new Promise((resolve, reject) => {
-                const req = indexedDB.open('SmartReceivingValidatorDB', 2);
+                const req = indexedDB.open('SmartReceivingValidatorDB', 3);
                 req.onupgradeneeded = (e) => {
                     const db = e.target.result;
                     if (!db.objectStoreNames.contains('kv_store')) {
@@ -1031,6 +1111,12 @@
                             autoIncrement: true
                         });
                         logStore.createIndex('by_date', 'tanggal_log', { unique: false });
+                    }
+                    if (!db.objectStoreNames.contains('media_evidences')) {
+                        const mediaStore = db.createObjectStore('media_evidences', {
+                            keyPath: 'id'
+                        });
+                        mediaStore.createIndex('by_target', 'targetUid', { unique: false });
                     }
                 };
                 req.onsuccess = () => resolve(req.result);
@@ -1651,7 +1737,306 @@
         }
 
         // =========================================================================
-        // 6. EXPORT MULTI-FORMAT: EXCEL (.XLSX), CSV (.CSV), DAN JSON (.JSON)
+        // 5B. DOKUMENTASI FOTO & VIDEO BUKTI (GOOGLE DRIVE + INDEXEDDB)
+        // =========================================================================
+        async function saveEvidenceRecordToIDB(record) {
+            const db = await openReceivingDB();
+            const tx = db.transaction('media_evidences', 'readwrite');
+            tx.objectStore('media_evidences').put(record);
+            return new Promise((resolve) => {
+                tx.oncomplete = () => resolve(true);
+                tx.onerror = () => resolve(false);
+            });
+        }
+
+        async function loadAllEvidencesFromIDB() {
+            try {
+                const db = await openReceivingDB();
+                const tx = db.transaction('media_evidences', 'readonly');
+                const req = tx.objectStore('media_evidences').getAll();
+                return await new Promise((resolve) => {
+                    req.onsuccess = () => resolve((req.result || []).sort((a, b) => b.createdAt - a.createdAt));
+                    req.onerror = () => resolve([]);
+                });
+            } catch (e) {
+                return [];
+            }
+        }
+
+        async function deleteEvidenceRecordFromIDB(id) {
+            try {
+                const db = await openReceivingDB();
+                const tx = db.transaction('media_evidences', 'readwrite');
+                tx.objectStore('media_evidences').delete(id);
+                await new Promise((resolve) => { tx.oncomplete = () => resolve(true); });
+            } catch (e) {}
+            state.evidences = state.evidences.filter(ev => ev.id !== id);
+            renderEvidenceGallery();
+            renderAll();
+        }
+
+        function compressImageFileToBase64(file, maxWidth = 1280, quality = 0.78) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        let w = img.width;
+                        let h = img.height;
+                        if (w > maxWidth) {
+                            h = Math.round((h * maxWidth) / w);
+                            w = maxWidth;
+                        }
+                        const canvas = document.createElement('canvas');
+                        canvas.width = w;
+                        canvas.height = h;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, w, h);
+                        const dataUrl = canvas.toDataURL('image/jpeg', quality);
+                        resolve({
+                            dataUrl,
+                            base64Data: dataUrl.split(',')[1],
+                            mimeType: 'image/jpeg'
+                        });
+                    };
+                    img.onerror = reject;
+                    img.src = ev.target.result;
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function readFileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    const dataUrl = ev.target.result;
+                    resolve({
+                        dataUrl,
+                        base64Data: dataUrl.split(',')[1],
+                        mimeType: file.type || 'application/octet-stream'
+                    });
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function uploadSingleEvidenceToDrive(record) {
+            const webhook = (state.driveWebhookUrl || '').trim();
+            if (!webhook || !navigator.onLine) return false;
+
+            try {
+                const firstRec = state.receivingItems[0] || {};
+                const payload = {
+                    kd_store: firstRec.kd_store || 'AM024',
+                    no_lpb: firstRec.no_lpb || 'LPB',
+                    tanggal: getTodayDateKey(),
+                    operator: record.operator,
+                    plu: record.plu || 'UMUM',
+                    descp: record.descp || 'Dokumentasi Sesi',
+                    note: record.note || '',
+                    fileName: record.fileName,
+                    mimeType: record.mimeType,
+                    base64Data: record.base64Data
+                };
+
+                const res = await fetch(webhook, {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
+                });
+                const json = await res.json();
+                if (json && json.status === 'ok' && json.fileUrl) {
+                    record.driveUrl = json.fileUrl;
+                    record.driveFolderUrl = json.folderUrl || '';
+                    record.syncedToDrive = true;
+                    // Kosongkan base64 besar setelah sukses naik ke Google Drive agar memori HP tetap lega
+                    if (record.mediaType === 'video') {
+                        record.base64Data = '';
+                        record.previewDataUrl = '';
+                    }
+                    await saveEvidenceRecordToIDB(record);
+                    return true;
+                }
+            } catch (err) {
+                console.warn('Upload Drive gagal, tetap tersimpan di IndexedDB:', err);
+            }
+            return false;
+        }
+
+        async function handleEvidenceFileSelected(file, mediaType) {
+            if (!file) return;
+            const statusBox = document.getElementById('evidenceUploadStatus');
+            const statusText = document.getElementById('evidenceUploadStatusText');
+            if (statusBox && statusText) {
+                statusBox.classList.remove('hidden');
+                statusText.textContent = mediaType === 'photo'
+                    ? 'Mengompresi foto & menyimpan bukti...'
+                    : 'Memproses video & menyimpan bukti...';
+            }
+
+            try {
+                const targetUid = state.activeEvidenceTargetUid || 'SESSION_GENERAL';
+                const targetItem = state.receivingItems.find(i => i.uid === targetUid);
+                const noteVal = (document.getElementById('evidenceNoteInput')?.value || '').trim();
+
+                const processed = mediaType === 'photo'
+                    ? await compressImageFileToBase64(file)
+                    : await readFileToBase64(file);
+
+                const ext = mediaType === 'photo' ? 'jpg' : (file.name.split('.').pop() || 'mp4');
+                const safeCode = targetItem ? (targetItem.plu || targetItem.barcode || 'ITEM') : 'SESI_LPB';
+                const fileName = `BUKTI_${safeCode}_${Date.now()}.${ext}`;
+
+                const record = {
+                    id: `ev_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+                    targetUid,
+                    plu: targetItem ? targetItem.plu : 'UMUM',
+                    barcode: targetItem ? targetItem.barcode : '-',
+                    descp: targetItem ? targetItem.descp : 'Dokumentasi Umum Sesi LPB',
+                    mediaType,
+                    fileName,
+                    mimeType: processed.mimeType,
+                    previewDataUrl: mediaType === 'photo' ? processed.dataUrl : '',
+                    base64Data: processed.base64Data,
+                    note: noteVal,
+                    operator: getCurrentOperatorName(),
+                    createdAt: Date.now(),
+                    waktu: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
+                    syncedToDrive: false,
+                    driveUrl: '',
+                    driveFolderUrl: ''
+                };
+
+                await saveEvidenceRecordToIDB(record);
+                state.evidences.unshift(record);
+
+                if (state.driveWebhookUrl && navigator.onLine) {
+                    if (statusText) statusText.textContent = 'Mengunggah ke Google Drive...';
+                    const ok = await uploadSingleEvidenceToDrive(record);
+                    showToast(ok
+                        ? 'Bukti berhasil diunggah ke Google Drive!'
+                        : 'Tersimpan offline di HP (Drive belum terhubung).', ok ? 'success' : 'warning');
+                } else {
+                    showToast('Bukti tersimpan aman di memori lokal aplikasi (Offline).', 'success');
+                }
+
+                await appendDailyScanLog({
+                    aksi: mediaType === 'photo' ? 'FOTO_BUKTI' : 'VIDEO_BUKTI',
+                    kd_store: targetItem ? targetItem.kd_store : 'AM024',
+                    plu: record.plu,
+                    barcode: record.barcode,
+                    descp: record.descp,
+                    qty_lpb: targetItem ? targetItem.qty_rec : 0,
+                    qty_sebelum: targetItem ? targetItem.qty_fisik : 0,
+                    qty_sesudah: targetItem ? targetItem.qty_fisik : 0,
+                    status_validasi: record.syncedToDrive ? 'Tersimpan di Google Drive' : 'Tersimpan Lokal (Offline)'
+                });
+
+                const noteInput = document.getElementById('evidenceNoteInput');
+                if (noteInput) noteInput.value = '';
+                renderEvidenceGallery();
+                renderAll();
+            } catch (err) {
+                console.error('Evidence error:', err);
+                showToast('Gagal memproses file media bukti.', 'error');
+            } finally {
+                if (statusBox) statusBox.classList.add('hidden');
+            }
+        }
+
+        async function syncPendingEvidencesToDrive() {
+            if (!state.driveWebhookUrl) {
+                showToast('Isi Webhook Google Apps Script dulu di Pengaturan.', 'warning');
+                return;
+            }
+            const pending = state.evidences.filter(e => !e.syncedToDrive && e.base64Data);
+            if (pending.length === 0) {
+                showToast('Semua bukti sudah tersinkron ke Google Drive.', 'info');
+                return;
+            }
+            let successCount = 0;
+            for (const rec of pending) {
+                const ok = await uploadSingleEvidenceToDrive(rec);
+                if (ok) successCount++;
+            }
+            renderEvidenceGallery();
+            renderAll();
+            showToast(`${successCount}/${pending.length} bukti berhasil diunggah ke Google Drive.`, 'success');
+        }
+
+        function openEvidenceModal(targetUid = 'SESSION_GENERAL') {
+            state.activeEvidenceTargetUid = targetUid;
+            const item = state.receivingItems.find(i => i.uid === targetUid);
+            setTextIfExists('evidenceTargetTitle', item
+                ? `${item.descp} (PLU: ${item.plu || '-'})`
+                : 'Dokumentasi Umum Sesi Penerimaan (LPB)');
+            renderEvidenceGallery();
+            openModal('evidenceModal');
+        }
+
+        function renderEvidenceGallery() {
+            const targetUid = state.activeEvidenceTargetUid || 'SESSION_GENERAL';
+            const list = state.evidences.filter(e =>
+                targetUid === 'SESSION_GENERAL' ? true : e.targetUid === targetUid
+            );
+            setTextIfExists('evidenceListCount', list.length);
+
+            const container = document.getElementById('evidenceGalleryList');
+            if (!container) return;
+
+            if (list.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">Belum ada foto atau video bukti.</p>`;
+                return;
+            }
+
+            container.innerHTML = list.map(ev => `
+                <div class="p-2.5 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-between gap-2.5 text-xs">
+                    <div class="flex items-center gap-2.5 min-w-0">
+                        ${ev.previewDataUrl
+                            ? `<img src="${ev.previewDataUrl}" alt="Bukti" class="w-12 h-12 rounded-lg object-cover border border-slate-200 shrink-0">`
+                            : `<div class="w-12 h-12 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center shrink-0"><i class="fas ${ev.mediaType === 'video' ? 'fa-video' : 'fa-image'}"></i></div>`
+                        }
+                        <div class="min-w-0">
+                            <div class="flex items-center gap-1.5 flex-wrap">
+                                <span class="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase ${ev.syncedToDrive ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
+                                    ${ev.syncedToDrive ? 'Google Drive' : 'Lokal HP'}
+                                </span>
+                                <span class="text-[10px] text-slate-500">${ev.waktu} • ${ev.operator}</span>
+                            </div>
+                            <p class="font-semibold text-slate-800 truncate mt-0.5">${ev.descp}</p>
+                            ${ev.note ? `<p class="text-[11px] text-slate-500 truncate">${ev.note}</p>` : ''}
+                            ${ev.driveUrl ? `<a href="${ev.driveUrl}" target="_blank" rel="noopener noreferrer" class="text-[11px] font-bold text-indigo-600 hover:underline inline-flex items-center gap-1 mt-0.5"><i class="fas fa-external-link-alt text-[9px]"></i>Buka di Google Drive</a>` : ''}
+                        </div>
+                    </div>
+                    <button type="button" onclick="deleteEvidenceRecordFromIDB('${ev.id}')" title="Hapus bukti"
+                            class="p-1.5 text-slate-400 hover:text-rose-600 shrink-0">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function toggleAppsScriptGuide() {
+            const box = document.getElementById('appsScriptGuideBox');
+            if (box) box.classList.toggle('hidden');
+        }
+
+        function copyAppsScriptCode() {
+            const codeEl = document.getElementById('appsScriptCodeSample');
+            if (!codeEl) return;
+            const ta = document.createElement('textarea');
+            ta.value = codeEl.textContent;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            showToast('Kode Google Apps Script berhasil disalin!', 'success');
+        }
+
+        // =========================================================================
+        // 6. EXPORT MULTI-FORMAT: PDF RESMI, EXCEL (.XLSX), CSV (.CSV), DAN JSON
         // =========================================================================
         function buildAuditExportDataset() {
             const firstRec = state.receivingItems[0] || {};
@@ -1670,8 +2055,11 @@
             const rows = state.receivingItems.map((item, idx) => {
                 const statusInfo = getItemValidationStatus(item);
                 const qtyLpb = Number(item.qty_rec) || 0;
-                const qtyFisik = Number(item.qty_fisik) || 0;
+                const qtyFisik = Number(item.qtyFinalLocked ? item.qty_final : item.qty_fisik) || 0;
                 const selisih = qtyFisik - qtyLpb;
+
+                const itemEvidences = state.evidences.filter(e => e.targetUid === item.uid);
+                const driveLinks = itemEvidences.map(e => e.driveUrl).filter(Boolean).join(' | ');
 
                 totalQtyLpb += qtyLpb;
                 totalQtyFisik += qtyFisik;
@@ -1697,18 +2085,27 @@
                     'Satuan': item.sat1 || 'PCS',
                     'Isi Karton': item.isi2 > 0 ? item.isi2 : 1,
                     'Qty LPB': qtyLpb,
-                    'Qty Fisik': qtyFisik,
+                    'Qty Final': qtyFisik,
                     'Selisih': selisih,
                     'Status Validasi': statusInfo.label,
+                    'Bukti Media': itemEvidences.length > 0 ? `${itemEvidences.length} file` : '-',
+                    'Link Google Drive': driveLinks || '-',
                     'Sumber Item': item.isNewItem ? 'Item Baru' : 'LPB',
                     'Catatan': item.keterangan || ''
                 };
             });
 
+            const allDriveLinks = Array.from(new Set(state.evidences.map(e => e.driveUrl).filter(Boolean)));
+            const driveFolderLink = (state.evidences.find(e => e.driveFolderUrl) || {}).driveFolderUrl || '';
+
             const summary = {
                 waktuExport: new Date().toLocaleString('id-ID'),
                 kodeStore: storeCode,
-                namaStore: firstRec.nama_store || '-',
+                namaStore: firstRec.nama_store || 'AMANDAMART',
+                noLpb: firstRec.no_lpb || '-',
+                noFaktur: firstRec.faktur || '-',
+                namaSupplier: firstRec.nama_supp || '-',
+                penginput: getCurrentOperatorName(),
                 statusSesi: state.isAuditFinished ? 'Selesai (Final)' : 'Berjalan (Draft)',
                 totalItem: rows.length,
                 barangSesuai: countSesuai,
@@ -1719,11 +2116,231 @@
                 belumDicek: countPending,
                 totalQtyLpb,
                 totalQtyFisik,
-                totalSelisih: totalQtyFisik - totalQtyLpb
+                totalSelisih: totalQtyFisik - totalQtyLpb,
+                totalBuktiMedia: state.evidences.length,
+                driveFolderLink,
+                allDriveLinks
             };
 
-            const baseFileName = `Hasil_Receiving_${storeCode}_${todayStr}`;
+            const baseFileName = `Berita_Acara_Receiving_${storeCode}_${todayStr}`;
             return { rows, summary, baseFileName };
+        }
+
+        function exportToPDF() {
+            if (!window.jspdf || !window.jspdf.jsPDF) {
+                showToast('Library PDF belum siap. Periksa koneksi internet.', 'error');
+                return;
+            }
+
+            const { rows, summary, baseFileName } = buildAuditExportDataset();
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+            // Header Kop Laporan
+            doc.setFillColor(15, 23, 42);
+            doc.rect(0, 0, 210, 28, 'F');
+
+            const logoImg = document.getElementById('storeLogoImg');
+            let textStartX = 14;
+            if (logoImg && !logoImg.classList.contains('hidden') && logoImg.src && logoImg.src.startsWith('data:image')) {
+                try {
+                    doc.setFillColor(255, 255, 255);
+                    doc.roundedRect(14, 4, 20, 20, 2, 2, 'F');
+                    doc.addImage(logoImg.src, 'PNG', 15, 5, 18, 18);
+                    textStartX = 38;
+                } catch (e) {}
+            }
+
+            doc.setTextColor(255, 255, 255);
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(13);
+            doc.text('BERITA ACARA PENERIMAAN BARANG (RECEIVING)', textStartX, 12);
+
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(8.5);
+            doc.setTextColor(203, 213, 225);
+            doc.text(`Store: ${summary.kodeStore} - ${summary.namaStore} | Dicetak: ${summary.waktuExport}`, textStartX, 18);
+            doc.text(`Penginput: ${summary.penginput} | Status Sesi: ${summary.statusSesi}`, textStartX, 23);
+
+            // Kotak Metadata LPB & Ringkasan
+            doc.setTextColor(30, 41, 59);
+            doc.setFillColor(248, 250, 252);
+            doc.setDrawColor(226, 232, 240);
+            doc.roundedRect(14, 33, 182, 22, 2, 2, 'FD');
+
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(8.5);
+            doc.text(`No. LPB: ${summary.noLpb}`, 18, 39);
+            doc.text(`No. Faktur: ${summary.noFaktur}`, 82, 39);
+            doc.text(`Supplier: ${summary.namaSupplier}`, 138, 39);
+
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(8);
+            doc.text(
+                `Ringkasan Status: Sesuai (${summary.barangSesuai}) | Kurang (${summary.barangKurang}) | Lebih (${summary.barangLebih}) | Tidak Ada (${summary.barangTidakAda}) | Item Baru (${summary.itemBaru})`,
+                18, 45
+            );
+            doc.text(
+                `Total Qty LPB: ${summary.totalQtyLpb}  |  Total Qty Final: ${summary.totalQtyFisik}  |  Selisih: ${summary.totalSelisih}  |  Dokumentasi Foto/Video: ${summary.totalBuktiMedia} file`,
+                18, 51
+            );
+
+            // Tabel Rincian Barang
+            const tableBody = rows.map(r => [
+                r['No'],
+                `${r['PLU']}\n${r['Barcode']}`,
+                r['Nama Produk'],
+                r['Qty LPB'],
+                r['Qty Final'],
+                r['Selisih'] > 0 ? `+${r['Selisih']}` : String(r['Selisih']),
+                r['Status Validasi'],
+                r['Bukti Media']
+            ]);
+
+            doc.autoTable({
+                startY: 59,
+                head: [['No', 'PLU / Barcode', 'Deskripsi Produk', 'LPB', 'Final', 'Selisih', 'Status', 'Bukti']],
+                body: tableBody,
+                theme: 'grid',
+                styles: {
+                    font: 'helvetica',
+                    fontSize: 7.5,
+                    cellPadding: 2,
+                    textColor: [30, 41, 59],
+                    lineColor: [226, 232, 240],
+                    lineWidth: 0.2
+                },
+                headStyles: {
+                    fillColor: [30, 41, 59],
+                    textColor: [255, 255, 255],
+                    fontStyle: 'bold',
+                    halign: 'center'
+                },
+                columnStyles: {
+                    0: { halign: 'center', cellWidth: 9 },
+                    1: { cellWidth: 27 },
+                    2: { cellWidth: 64 },
+                    3: { halign: 'right', cellWidth: 13 },
+                    4: { halign: 'right', cellWidth: 13 },
+                    5: { halign: 'right', cellWidth: 14 },
+                    6: { halign: 'center', cellWidth: 26 },
+                    7: { halign: 'center', cellWidth: 16 }
+                },
+                didParseCell(data) {
+                    if (data.section === 'body' && data.column.index === 6) {
+                        const val = String(data.cell.raw || '');
+                        if (val.includes('Sesuai')) {
+                            data.cell.styles.fillColor = [220, 252, 231];
+                            data.cell.styles.textColor = [22, 101, 52];
+                        } else if (val.includes('Kurang')) {
+                            data.cell.styles.fillColor = [254, 243, 199];
+                            data.cell.styles.textColor = [146, 64, 14];
+                        } else if (val.includes('Lebih')) {
+                            data.cell.styles.fillColor = [255, 237, 213];
+                            data.cell.styles.textColor = [154, 52, 18];
+                        } else if (val.includes('Tidak Ada')) {
+                            data.cell.styles.fillColor = [254, 226, 226];
+                            data.cell.styles.textColor = [153, 27, 27];
+                        } else if (val.includes('Baru')) {
+                            data.cell.styles.fillColor = [224, 231, 255];
+                            data.cell.styles.textColor = [55, 48, 163];
+                        }
+                    }
+                }
+            });
+
+            let finalY = (doc.lastAutoTable && doc.lastAutoTable.finalY) ? doc.lastAutoTable.finalY + 7 : 200;
+
+            // Lampiran Tautan Google Drive Bukti Foto/Video (jika ada)
+            if (summary.driveFolderLink || summary.allDriveLinks.length > 0) {
+                if (finalY > 245) {
+                    doc.addPage();
+                    finalY = 18;
+                }
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(8.5);
+                doc.setTextColor(15, 23, 42);
+                doc.text('Lampiran Link Dokumentasi Foto & Video (Google Drive):', 14, finalY);
+                finalY += 4.5;
+
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(7.5);
+                doc.setTextColor(37, 99, 235);
+
+                const linksToPrint = summary.driveFolderLink
+                    ? [`Folder Utama Bukti: ${summary.driveFolderLink}`, ...summary.allDriveLinks.slice(0, 5)]
+                    : summary.allDriveLinks.slice(0, 6);
+
+                linksToPrint.forEach((lnk) => {
+                    doc.text(lnk, 14, finalY);
+                    finalY += 4;
+                });
+                finalY += 4;
+            }
+
+            // Blok Tanda Tangan 3 Pihak
+            if (finalY > 250) {
+                doc.addPage();
+                finalY = 20;
+            }
+            doc.setTextColor(30, 41, 59);
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(8);
+
+            const signCols = [
+                { title: 'Petugas Penerima / Penginput', name: `(${summary.penginput})`, x: 40 },
+                { title: 'Mengetahui, Kepala Toko', name: '( .............................. )', x: 105 },
+                { title: 'Pengirim / Supir Ekspedisi', name: '( .............................. )', x: 168 }
+            ];
+
+            signCols.forEach(col => {
+                doc.text(col.title, col.x, finalY, { align: 'center' });
+                doc.text(col.name, col.x, finalY + 18, { align: 'center' });
+            });
+
+            doc.save(`${baseFileName}.pdf`);
+            closeModal('exportModal');
+            showToast(`Berita Acara PDF (${baseFileName}.pdf) berhasil diunduh.`, 'success');
+        }
+
+        function composeHeadOfficeEmail() {
+            const { summary } = buildAuditExportDataset();
+            const recipient = encodeURIComponent((state.hqEmail || '').trim());
+            const subject = encodeURIComponent(
+                `Laporan Penerimaan Barang [${summary.kodeStore}] LPB ${summary.noLpb} - ${summary.statusSesi}`
+            );
+
+            const driveSection = summary.driveFolderLink
+                ? `Folder Bukti Foto/Video (Google Drive):\n${summary.driveFolderLink}\n`
+                : (summary.allDriveLinks.length > 0
+                    ? `Link Bukti Foto/Video (Google Drive):\n${summary.allDriveLinks.join('\n')}\n`
+                    : `Catatan Bukti: ${summary.totalBuktiMedia} file tersimpan lokal (lampirkan file PDF/CSV bersama email ini).\n`);
+
+            const bodyText = [
+                `Assalamu'alaikum / Selamat Pagi/Siang,`,
+                ``,
+                `Berikut laporan hasil pengecekan penerimaan barang toko:`,
+                `- Store: ${summary.kodeStore} (${summary.namaStore})`,
+                `- No. LPB / Faktur: ${summary.noLpb} / ${summary.noFaktur}`,
+                `- Supplier: ${summary.namaSupplier}`,
+                `- Petugas Input: ${summary.penginput}`,
+                `- Status Sesi: ${summary.statusSesi}`,
+                ``,
+                `Ringkasan Hasil Pengecekan:`,
+                `- Barang Sesuai: ${summary.barangSesuai} item`,
+                `- Barang Kurang: ${summary.barangKurang} item`,
+                `- Barang Lebih: ${summary.barangLebih} item`,
+                `- Barang Tidak Ada: ${summary.barangTidakAda} item`,
+                `- Item Baru: ${summary.itemBaru} item`,
+                `- Total Qty LPB vs Final: ${summary.totalQtyLpb} vs ${summary.totalQtyFisik} (Selisih: ${summary.totalSelisih})`,
+                ``,
+                driveSection,
+                `Mohon periksa lampiran file Berita Acara PDF / Excel / CSV terlampir.`,
+                `Terima kasih.`
+            ].join('\n');
+
+            window.location.href = `mailto:${recipient}?subject=${subject}&body=${encodeURIComponent(bodyText)}`;
+            showToast('Membuka draf email laporan untuk Kantor Pusat...', 'info');
         }
 
         function openExportModal() {
@@ -1910,6 +2527,7 @@
             setTextIfExists('countBaru', baru);
             setTextIfExists('countAll', state.receivingItems.length);
             setTextIfExists('countPending', pending);
+            setTextIfExists('sessionEvidenceCount', state.evidences.length);
         }
 
         function renderAll() {
@@ -1961,6 +2579,7 @@
 
             container.innerHTML = filtered.map(item => {
                 const st = getItemValidationStatus(item);
+                const itemEvCount = state.evidences.filter(e => e.targetUid === item.uid).length;
                 const diff = (Number(item.qty_fisik) || 0) - (Number(item.qty_rec) || 0);
                 const diffLabel = item.isNewItem
                     ? `+${item.qty_fisik} (Baru)`
@@ -1971,83 +2590,81 @@
                         <div class="flex items-start justify-between gap-2">
                             <div class="min-w-0 flex-1">
                                 <div class="flex items-center gap-1.5 flex-wrap">
-                                    <span data-status-badge class="px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase border ${st.badgeClass}">
-                                        ${st.label}
-                                    </span>
-                                    <span class="font-mono text-[11px] font-semibold text-slate-600 bg-white/80 px-1.5 py-0.5 rounded border border-slate-200/80">
-                                        PLU: ${item.plu || '-'}
-                                    </span>
-                                    <span class="font-mono text-[11px] text-slate-500">
-                                        BC: ${item.barcode || '-'}
-                                    </span>
-                                    ${item.lokasi ? `<span class="text-[10px] font-semibold text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded"><i class="fas fa-map-marker-alt mr-0.5"></i>${item.lokasi}</span>` : ''}
-                                </div>
-                                <h4 class="text-xs sm:text-sm font-bold text-slate-900 mt-1.5 leading-snug">${item.descp}</h4>
-                                ${item.keterangan ? `<p class="text-[11px] text-slate-500 mt-0.5">${item.keterangan}</p>` : ''}
-                            </div>
-
-                            ${item.isNewItem ? `
-                                <button type="button" onclick="removeNewItem('${item.uid}')" title="Hapus item baru"
-                                        class="p-1.5 rounded-lg text-rose-500 hover:bg-rose-100/70 transition-colors">
-                                    <i class="fas fa-trash-alt text-xs"></i>
-                                </button>
-                            ` : ''}
-                        </div>
-
-                        <div class="mt-3 pt-2.5 border-t border-slate-200/70 flex flex-wrap items-center justify-between gap-2">
-                            <div class="flex items-center gap-3 text-xs">
-                                ${!item.isNewItem ? `
-                                    <div>
-                                        <span class="text-[10px] text-slate-500 block">Qty LPB</span>
-                                        <span class="font-mono font-bold text-slate-800">${item.qty_rec} <span class="text-[10px] font-normal">${item.sat1}</span></span>
-                                    </div>
-                                    <div class="h-6 w-px bg-slate-200"></div>
-                                ` : ''}
-                                <div>
-                                    <span class="text-[10px] text-slate-500 block">Qty Final (Fix)</span>
-                                    <button type="button" onclick="setFixQtyFinal('${item.uid}')" title="Klik untuk mengunci/membuka Qty Final"
-                                            class="inline-flex items-center gap-1 font-mono font-bold ${item.qtyFinalLocked ? 'text-emerald-700 bg-emerald-100/80 px-1.5 py-0.5 rounded' : 'text-indigo-700 hover:underline'}">
-                                        <i class="fas ${item.qtyFinalLocked ? 'fa-lock text-[9px]' : 'fa-lock-open text-[9px] opacity-60'}"></i>
-                                        <span data-final-qty-display>${item.qtyFinalLocked ? item.qty_final : item.qty_fisik} ${item.sat1}</span>
-                                    </button>
-                                </div>
-                                <div class="h-6 w-px bg-slate-200"></div>
-                                <div>
-                                    <span class="text-[10px] text-slate-500 block">Selisih</span>
-                                    <span data-diff-label class="font-mono font-bold ${st.qtyColor}">${diffLabel}</span>
-                                </div>
-                            </div>
-
-                            <div class="flex items-center gap-1.5">
-                                ${item.isi2 > 1 ? `
-                                    <button type="button" onclick="adjustItemQty('${item.uid}', ${item.isi2})"
-                                            class="px-2 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-[11px] font-bold transition-all active:scale-95">
-                                        +${item.isi2} (${item.sat2 || 'CRT'})
-                                    </button>
-                                ` : ''}
-
-                                <div class="inline-flex items-center rounded-xl border border-slate-300 bg-white overflow-hidden shadow-2xs">
-                                    <button type="button" onclick="adjustItemQty('${item.uid}', -1)"
-                                            class="w-8 h-8 flex items-center justify-center text-slate-600 hover:bg-slate-100 active:bg-slate-200 font-bold">
-                                        <i class="fas fa-minus text-[10px]"></i>
-                                    </button>
-                                    <input type="number" min="0" inputmode="numeric" value="${item.qty_fisik}"
-                                           data-prev-qty="${item.qty_fisik}"
-                                           onfocus="this.dataset.prevQty=this.value; this.select();"
-                                           oninput="handleLiveManualQtyInput('${item.uid}', this.value, this)"
-                                           onblur="finalizeManualQtyEdit('${item.uid}', this)"
-                                           onkeydown="if(event.key==='Enter'){ event.preventDefault(); this.blur(); }"
-                                           class="w-14 h-8 text-center font-mono text-xs sm:text-sm font-extrabold ${st.qtyColor} focus:outline-none focus:bg-indigo-50/40">
-                                    <button type="button" onclick="adjustItemQty('${item.uid}', 1)"
-                                            class="w-8 h-8 flex items-center justify-center text-slate-700 hover:bg-slate-100 active:bg-slate-200 font-bold">
-                                        <i class="fas fa-plus text-[10px]"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
+                        <span class="font-mono text-[10px] font-semibold text-slate-600 bg-white/80 px-1.5 py-0.5 rounded border border-slate-200/80">
+                            PLU: ${item.plu || '-'}
+                        </span>
+                        <span class="font-mono text-[11px] text-slate-500">
+                            BC: ${item.barcode || '-'}
+                        </span>
+                        ${item.lokasi ? `<span class="text-[10px] font-semibold text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded"><i class="fas fa-map-marker-alt mr-0.5"></i>${item.lokasi}</span>` : ''}
                     </div>
-                `;
-            }).join('');
+                    <h4 class="text-xs sm:text-sm font-bold text-slate-900 mt-1.5 leading-snug">${item.descp}</h4>
+                    ${item.keterangan ? `<p class="text-[11px] text-slate-500 mt-0.5">${item.keterangan}</p>` : ''}
+                </div>
+
+                <div class="flex items-center gap-1 shrink-0">
+                    <button type="button" onclick="openEvidenceModal('${item.uid}')" title="Foto / Video Bukti Barang"
+                            class="px-2 py-1.5 rounded-lg border ${itemEvCount > 0 ? 'bg-sky-100 border-sky-300 text-sky-800' : 'bg-white/90 border-slate-200 text-slate-600 hover:text-sky-700'} text-[11px] font-bold inline-flex items-center gap-1 transition-all">
+                        <i class="fas fa-camera"></i>
+                        ${itemEvCount > 0 ? `<span>${itemEvCount}</span>` : ''}
+                    </button>
+                    ${item.isNewItem ? `
+                        <button type="button" onclick="removeNewItem('${item.uid}')" title="Hapus item baru"
+                                class="p-1.5 rounded-lg text-rose-500 hover:bg-rose-100/70 transition-colors">
+                            <i class="fas fa-trash-alt text-xs"></i>
+                        </button>
+                    ` : ''}
+                </div>
+            </div>
+
+            <div class="mt-3 pt-2.5 border-t border-slate-200/70 flex flex-wrap items-center justify-between gap-2 text-xs">
+                <div class="flex items-center gap-3">
+                    <div>
+                        <span class="block text-[10px] text-slate-500">Target LPB</span>
+                        <span class="font-mono font-extrabold text-slate-800">${item.qty_rec} ${item.sat1}</span>
+                    </div>
+                    <div>
+                        <span class="block text-[10px] text-slate-500">Selisih</span>
+                        <span data-diff-label class="font-mono font-bold ${st.qtyColor}">${diffLabel}</span>
+                    </div>
+                    <div>
+                        <span class="block text-[10px] text-slate-500">Qty Final (Fix)</span>
+                        <button type="button" onclick="setFixQtyFinal('${item.uid}')" title="Klik untuk kunci/buka Qty Final"
+                                class="inline-flex items-center gap-1 font-mono font-extrabold ${item.qtyFinalLocked ? 'text-emerald-700' : 'text-slate-700'}">
+                            <span data-final-qty-display>${item.qtyFinalLocked ? item.qty_final : item.qty_fisik} ${item.sat1}</span>
+                            <i class="fas ${item.qtyFinalLocked ? 'fa-lock text-[10px]' : 'fa-lock-open text-[10px] opacity-40'}"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-1.5">
+                    <button type="button" onclick="adjustItemQty('${item.uid}', -1)"
+                            class="w-8 h-8 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 font-bold active:scale-95">
+                        <i class="fas fa-minus text-[10px]"></i>
+                    </button>
+                    <input type="number" min="0" inputmode="numeric"
+                           value="${item.qty_fisik}"
+                           data-prev-qty="${item.qty_fisik}"
+                           onfocus="this.dataset.prevQty=this.value; this.select();"
+                           oninput="handleLiveManualQtyInput('${item.uid}', this.value, this)"
+                           onblur="finalizeManualQtyEdit('${item.uid}', this)"
+                           onkeydown="if(event.key==='Enter'){ event.preventDefault(); this.blur(); }"
+                           class="w-14 h-8 text-center rounded-lg border border-slate-300 bg-white font-mono text-xs sm:text-sm font-extrabold ${st.qtyColor} focus:outline-none focus:ring-2 focus:ring-indigo-500/25">
+                    <button type="button" onclick="adjustItemQty('${item.uid}', 1)"
+                            class="w-8 h-8 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-bold active:scale-95">
+                        <i class="fas fa-plus text-[10px]"></i>
+                    </button>
+                    ${item.isi2 > 1 ? `
+                        <button type="button" onclick="adjustItemQty('${item.uid}', ${item.isi2})"
+                                class="px-2 h-8 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-bold active:scale-95">
+                            +${item.isi2}
+                        </button>
+                    ` : ''}
+                </div>
+            </div>
+        </div>
+    `;
+}).join('');
         }
 
         // =========================================================================
@@ -2061,6 +2678,8 @@
                 isAuditFinished: state.isAuditFinished,
                 masterUrl: state.masterUrl,
                 receivedUrl: state.receivedUrl,
+                hqEmail: state.hqEmail,
+                driveWebhookUrl: state.driveWebhookUrl,
                 updatedAt: Date.now()
             };
             await idbSet('receivingSession', payload);
@@ -2179,6 +2798,7 @@
             }
 
             const savedSession = await idbGet('receivingSession');
+            state.evidences = await loadAllEvidencesFromIDB();
             if (savedSession && Array.isArray(savedSession.receivingItems) && savedSession.receivingItems.length > 0) {
                 if (savedSession.operator) state.operator = savedSession.operator;
                 state.masterProducts = savedSession.masterProducts || FALLBACK_MASTER;
@@ -2186,6 +2806,8 @@
                 state.isAuditFinished = Boolean(savedSession.isAuditFinished);
                 state.masterUrl = savedSession.masterUrl || DEFAULT_MASTER_URL;
                 state.receivedUrl = savedSession.receivedUrl || DEFAULT_RECEIVED_URL;
+                state.hqEmail = savedSession.hqEmail || '';
+                state.driveWebhookUrl = savedSession.driveWebhookUrl || '';
                 renderAll();
                 if (navigator.onLine) syncFromGithub(true);
             } else {
@@ -2395,8 +3017,12 @@
                 openSettingsBtnEl.addEventListener('click', () => {
                     const mInp = document.getElementById('masterUrlInput');
                     const rInp = document.getElementById('receivedUrlInput');
+                    const emailInp = document.getElementById('hqEmailInput');
+                    const driveInp = document.getElementById('driveWebhookUrlInput');
                     if (mInp) mInp.value = state.masterUrl || DEFAULT_MASTER_URL;
                     if (rInp) rInp.value = state.receivedUrl || DEFAULT_RECEIVED_URL;
+                    if (emailInp) emailInp.value = state.hqEmail || '';
+                    if (driveInp) driveInp.value = state.driveWebhookUrl || '';
                     openModal('settingsModal');
                 });
             }
@@ -2409,10 +3035,33 @@
                 saveAndSyncUrlBtnEl.addEventListener('click', async () => {
                     const mInp = document.getElementById('masterUrlInput');
                     const rInp = document.getElementById('receivedUrlInput');
+                    const emailInp = document.getElementById('hqEmailInput');
+                    const driveInp = document.getElementById('driveWebhookUrlInput');
                     state.masterUrl = (mInp && mInp.value.trim()) || DEFAULT_MASTER_URL;
                     state.receivedUrl = (rInp && rInp.value.trim()) || DEFAULT_RECEIVED_URL;
+                    state.hqEmail = (emailInp && emailInp.value.trim()) || '';
+                    state.driveWebhookUrl = (driveInp && driveInp.value.trim()) || '';
+                    await saveSessionToIDB();
                     closeModal('settingsModal');
                     await syncFromGithub(false);
+                });
+            }
+
+            const evPhotoInp = document.getElementById('evidencePhotoInput');
+            if (evPhotoInp) {
+                evPhotoInp.addEventListener('change', async (e) => {
+                    const file = e.target.files[0];
+                    if (file) await handleEvidenceFileSelected(file, 'photo');
+                    e.target.value = '';
+                });
+            }
+
+            const evVideoInp = document.getElementById('evidenceVideoInput');
+            if (evVideoInp) {
+                evVideoInp.addEventListener('change', async (e) => {
+                    const file = e.target.files[0];
+                    if (file) await handleEvidenceFileSelected(file, 'video');
+                    e.target.value = '';
                 });
             }
 
