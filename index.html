@@ -146,6 +146,10 @@
                     <div class="flex items-center gap-1.5">
                         <h1 class="text-sm sm:text-base font-extrabold text-slate-900 truncate tracking-tight">Receiving Validator</h1>
                         <span id="storeCodeBadge" class="px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200 font-mono text-[10px] font-bold shrink-0">AM024</span>
+                        <span id="activeOperatorBadge" onclick="openOperatorLoginModal()" title="Klik untuk ganti penginput"
+                              class="cursor-pointer px-2 py-0.5 rounded-full bg-slate-100 hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 border border-slate-200 text-[10px] font-bold truncate max-w-[110px]">
+                            <i class="fas fa-user-check mr-1"></i><span id="operatorNameLabel">Belum Login</span>
+                        </span>
                     </div>
                     <p id="lpbSubheader" class="text-[11px] text-slate-500 truncate">Memuat data penerimaan...</p>
                 </div>
@@ -167,6 +171,11 @@
                         class="inline-flex items-center gap-1.5 px-2.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-2xs transition-all active:scale-95">
                     <i class="fas fa-file-export"></i>
                     <span class="hidden sm:inline">Export</span>
+                </button>
+
+                <button id="openOperatorBtnTop" type="button" onclick="openOperatorLoginModal()" title="Login / Ganti Penginput"
+                        class="p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs transition-all active:scale-95">
+                    <i class="fas fa-user-shield"></i>
                 </button>
 
                 <button id="openSettingsBtn" type="button" title="Pengaturan Link GitHub & Import JSON"
@@ -339,10 +348,10 @@
                     </div>
                     <div>
                         <div class="flex items-center gap-2">
-                            <h3 class="text-xs sm:text-sm font-bold text-slate-900">Riwayat Log Aktivitas Scan Harian</h3>
+                            <h3 class="text-xs sm:text-sm font-bold text-slate-900">Log Pekerjaan (Terpisah dari Qty Final)</h3>
                             <span id="dailyLogCountBadge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">0 Log</span>
                         </div>
-                        <p class="text-[11px] text-slate-500">Tersimpan otomatis di IndexedDB per tanggal</p>
+                        <p class="text-[11px] text-slate-500">Jejak aktivitas penginput saja • Tidak mengubah Qty Final secara otomatis</p>
                     </div>
                 </div>
 
@@ -367,6 +376,53 @@
         </section>
 
     </main>
+
+    <!-- ======================================================================= -->
+    <!-- MODAL 0: LOGIN PENGINPUT MULTI-PERANGKAT                                -->
+    <!-- ======================================================================= -->
+    <div id="operatorLoginModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+        <form id="operatorLoginForm" class="bg-white rounded-2xl border border-slate-200 shadow-xl max-w-sm w-full p-5 space-y-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center">
+                        <i class="fas fa-id-badge text-sm"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-extrabold text-slate-900">Login Penginput Barang</h3>
+                        <p class="text-[11px] text-slate-500">Sinkronisasi real-time antar perangkat</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeModal('operatorLoginModal')" class="p-1.5 text-slate-400 hover:text-slate-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="space-y-2.5">
+                <div>
+                    <label for="operatorNameInput" class="block text-[11px] font-bold text-slate-700 mb-1">Nama / Kode Penginput *</label>
+                    <input type="text" id="operatorNameInput" required placeholder="Contoh: ANDREW / TIM-RAK-A"
+                           class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-bold uppercase focus:outline-none focus:ring-2 focus:ring-indigo-500/25 focus:border-indigo-500">
+                </div>
+                <div>
+                    <label for="operatorPinInput" class="block text-[11px] font-bold text-slate-700 mb-1">PIN / Kode Akses Tim (Opsional)</label>
+                    <input type="password" id="operatorPinInput" placeholder="Masukkan PIN tim jika digunakan"
+                           class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500/25 focus:border-indigo-500">
+                </div>
+                <div>
+                    <label for="sharedSessionCodeInput" class="block text-[11px] font-bold text-slate-700 mb-1">Kode Ruang Sesi LPB (1 Pintu Antar HP)</label>
+                    <input type="text" id="sharedSessionCodeInput" required
+                           class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-mono font-bold uppercase focus:outline-none focus:ring-2 focus:ring-indigo-500/25 focus:border-indigo-500">
+                    <p class="text-[10px] text-slate-500 mt-1">Gunakan kode sesi yang sama di semua HP penghitung agar update qty real-time.</p>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-2 pt-1">
+                <button type="submit" class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-2xs transition-all">
+                    Masuk & Hubungkan Sesi
+                </button>
+            </div>
+        </form>
+    </div>
 
     <!-- ======================================================================= -->
     <!-- MODAL 1: KONFIRMASI SCAN ULANG PRODUK YANG SAMA                         -->
@@ -548,85 +604,124 @@
                            class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-mono">
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold text-slate-700 mb-1">Link GitHub Penerimaan Barang (received.json)</label>
+                    <label class="block text-[11px] font-bold text-slate-700 mb-1">Link GitHub Data Penerimaan (received.json)</label>
                     <input type="url" id="receivedUrlInput"
                            class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-mono">
                 </div>
                 <button id="saveAndSyncUrlBtn" type="button"
-                        class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold">
-                    Simpan Link & Sinkronkan Sekarang
+                        class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-all">
+                    Simpan & Sinkronkan URL
                 </button>
             </div>
 
-            <div class="pt-3 border-t border-slate-200 space-y-2">
-                <p class="text-[11px] font-bold text-slate-700">Import File JSON Manual (Offline):</p>
+            <div class="pt-3 border-t border-slate-100 space-y-2">
+                <p class="text-[11px] font-bold text-slate-700">Import File JSON Lokal (Opsional)</p>
                 <div class="grid grid-cols-2 gap-2">
-                    <label class="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-slate-300 bg-slate-50 hover:bg-slate-100 text-xs font-semibold cursor-pointer">
-                        <i class="fas fa-upload text-indigo-600"></i>
-                        <span>master.json</span>
-                        <input type="file" id="importMasterFile" accept=".json" class="hidden">
+                    <label class="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-slate-300 bg-slate-50 hover:bg-slate-100 text-xs font-semibold text-slate-700 cursor-pointer">
+                        <i class="fas fa-file-import text-indigo-600"></i>
+                        <span>Master JSON</span>
+                        <input type="file" id="importMasterFile" accept=".json,application/json" class="hidden">
                     </label>
-                    <label class="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-slate-300 bg-slate-50 hover:bg-slate-100 text-xs font-semibold cursor-pointer">
-                        <i class="fas fa-upload text-emerald-600"></i>
-                        <span>received.json</span>
-                        <input type="file" id="importReceivedFile" accept=".json" class="hidden">
+                    <label class="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-slate-300 bg-slate-50 hover:bg-slate-100 text-xs font-semibold text-slate-700 cursor-pointer">
+                        <i class="fas fa-file-import text-emerald-600"></i>
+                        <span>Received JSON</span>
+                        <input type="file" id="importReceivedFile" accept=".json,application/json" class="hidden">
                     </label>
                 </div>
             </div>
 
-            <div class="pt-3 border-t border-slate-200">
+            <div class="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
                 <button id="resetSessionBtn" type="button"
-                        class="w-full py-2 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold">
-                    Reset Semua Qty Fisik ke 0
+                        class="px-3.5 py-2 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold transition-all">
+                    Reset Qty Sesi
+                </button>
+                <button type="button" onclick="closeModal('settingsModal')"
+                        class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-all">
+                    Tutup
                 </button>
             </div>
         </div>
     </div>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    <!-- ======================================================================= -->
-    <!-- FOOTER KUSTOM SESUAI PERMINTAAN                                         -->
-    <!-- ======================================================================= -->
-    <footer class="social-footer-container">
-      <!-- Row 1: Icon Social Media (Tiduran / Horizontal) -->
-      <div class="social-footer-bar">
-        <a href="https://www.linkedin.com/in/yudi-dwiranto-cs77" target="_blank" rel="noopener noreferrer" class="social-icon linkedin" aria-label="LinkedIn">
-          <i class="fab fa-linkedin-in"></i>
-          <span class="tooltip">LinkedIn</span>
-        </a>
-        
-        <a href="https://web.facebook.com/ydwiranto" target="_blank" rel="noopener noreferrer" class="social-icon facebook" aria-label="Facebook">
-          <i class="fab fa-facebook-f"></i>
-          <span class="tooltip">Facebook</span>
-        </a>
-        
-        <a href="https://www.instagram.com/yudi_cah_sragen_77/" target="_blank" rel="noopener noreferrer" class="social-icon instagram" aria-label="Instagram">
-          <i class="fab fa-instagram"></i>
-          <span class="tooltip">Instagram</span>
-        </a>
-        
-        <a href="https://wa.me/6281389188903?text=Assalamu.alaikum...%20Halo!%20Selamat%20[Pagi,%20Siang,%20Sore]%20Saya%20baru%20saja%20melihat%20web%20aplikasi%20Anda%20dan%20tertarik%20dengan%20solusinya.%20Kalau%20ada%20waktu%20luang,%20boleh%20kita%20mengobrol%20santai%20dulu%20untuk%20melihat%20potensi%20kerja%20sama%20ke%20depan%20?%20Terima%20kasih" target="_blank" rel="noopener noreferrer" class="social-icon whatsapp" aria-label="WhatsApp">
-          <i class="fab fa-whatsapp"></i>
-          <span class="tooltip">WhatsApp</span>
-        </a>
-        
-        <a href="https://id.shp.ee/yudmwbm1?fromSource=whatsapp&smtt=0.0.3" target="_blank" rel="noopener noreferrer" class="social-icon shopee" aria-label="Shopee">
-          <i class="fas fa-shopping-bag"></i>
-          <span class="tooltip">Shopee</span>
-        </a>
-        
-        <a href="https://www.tiktok.com/@selarasdirumah" target="_blank" rel="noopener noreferrer" class="social-icon tiktok" aria-label="TikTok">
-          <i class="fab fa-tiktok"></i>
-          <span class="tooltip">TikTok</span>
-        </a>
-      </div>
-      <!-- Kolaborator & Hak Cipta -->
-      <div class="footer-credits">
-        Handcrafted with ❤️ by <strong>Andrew Dwiranto</strong> (Cah_Sragen_77, Indonesia)
-        <div class="mt-1.5">
-          © 2026 Hak Cipta Dilindungi Undang-Undang
-        </div>
-      </div>
-    </footer>
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'smart-receiving-validator';
+        let cloudDb = null;
+        let cloudAuth = null;
+        let cloudUser = null;
+        let unsubscribeSharedSession = null;
+        let isApplyingRemoteSnapshot = false;
+
+        window.realtimeSyncEngine = {
+            async initCloudSync(sessionCode, onRemoteUpdate) {
+                try {
+                    if (typeof __firebase_config === 'undefined' || !__firebase_config) {
+                        return false;
+                    }
+                    const cfg = JSON.parse(__firebase_config);
+                    const app = initializeApp(cfg);
+                    cloudAuth = getAuth(app);
+                    cloudDb = getFirestore(app);
+
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(cloudAuth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(cloudAuth);
+                    }
+                    cloudUser = cloudAuth.currentUser;
+                    if (!cloudUser) return false;
+
+                    window.realtimeSyncEngine.subscribeSession(sessionCode, onRemoteUpdate);
+                    return true;
+                } catch (err) {
+                    console.warn('Cloud real-time sync fallback ke lokal/IDB:', err);
+                    return false;
+                }
+            },
+
+            subscribeSession(sessionCode, onRemoteUpdate) {
+                if (!cloudDb || !cloudUser) return;
+                if (typeof unsubscribeSharedSession === 'function') {
+                    unsubscribeSharedSession();
+                }
+                const cleanCode = String(sessionCode || 'AM024-LPB').trim().replace(/[^a-zA-Z0-9_-]/g, '_');
+                const docRef = doc(cloudDb, 'artifacts', appId, 'public', 'data', 'receiving_sessions', cleanCode);
+
+                unsubscribeSharedSession = onSnapshot(docRef, (snap) => {
+                    if (!snap.exists()) return;
+                    const data = snap.data();
+                    if (!data || data.lastUpdatedByDevice === window.getDeviceId()) return;
+
+                    isApplyingRemoteSnapshot = true;
+                    try {
+                        onRemoteUpdate(data);
+                    } finally {
+                        setTimeout(() => { isApplyingRemoteSnapshot = false; }, 120);
+                    }
+                }, (err) => {
+                    console.warn('onSnapshot error:', err);
+                });
+            },
+
+            async pushSessionState(sessionCode, payload) {
+                if (isApplyingRemoteSnapshot || !cloudDb || !cloudUser) return;
+                try {
+                    const cleanCode = String(sessionCode || 'AM024-LPB').trim().replace(/[^a-zA-Z0-9_-]/g, '_');
+                    const docRef = doc(cloudDb, 'artifacts', appId, 'public', 'data', 'receiving_sessions', cleanCode);
+                    await setDoc(docRef, {
+                        ...payload,
+                        lastUpdatedByDevice: window.getDeviceId(),
+                        lastUpdatedByOperator: window.getCurrentOperatorName(),
+                        serverSyncedAt: Date.now()
+                    }, { merge: true });
+                } catch (err) {
+                    console.warn('Gagal push state real-time:', err);
+                }
+            }
+        };
+    </script>
 
     <script>
         // =========================================================================
@@ -692,7 +787,10 @@
                     descp: rec.descp || master.descp || 'PRODUK TANPA NAMA',
                     qty_rec: Number(rec.qty_rec) || 0,
                     qty_fisik: 0,
+                    qty_final: 0,
+                    qtyFinalLocked: false,
                     hasBeenScanned: false,
+                    lastUpdatedBy: '-',
                     sat1: master.sat1 && master.sat1 !== '0' ? master.sat1 : 'PCS',
                     sat2: master.sat2 && master.sat2 !== '0' ? master.sat2 : '',
                     isi2: Number(master.isi2) || 0,
@@ -706,7 +804,8 @@
 
         function getItemValidationStatus(item) {
             const rec = Number(item.qty_rec) || 0;
-            const phys = Number(item.qty_fisik) || 0;
+            // Qty Final (Qty Fix) menjadi acuan utama jika sudah disahkan atau disesuaikan
+            const phys = Number(item.qtyFinalLocked ? item.qty_final : (item.qty_fisik ?? 0)) || 0;
 
             if (item.isNewItem) {
                 return {
@@ -763,288 +862,25 @@
         }
 
         // =========================================================================
-        // 2. INDEXEDDB WRAPPER UNTUK PENYIMPANAN OFFLINE & LOG HARIAN
+        // 3. STATE APLIKASI, IDENTITAS PENGINPUT & UTILITAS
         // =========================================================================
-        const DB_NAME = 'ReceivingValidatorDB_v2';
-        const DB_STORE = 'appStateStore';
-        const LOG_STORE = 'daily_scan_logs';
-
-        function openIDB() {
-            return new Promise((resolve, reject) => {
-                const req = indexedDB.open(DB_NAME, 2);
-                req.onupgradeneeded = (e) => {
-                    const db = e.target.result;
-                    if (!db.objectStoreNames.contains(DB_STORE)) {
-                        db.createObjectStore(DB_STORE);
-                    }
-                    if (!db.objectStoreNames.contains(LOG_STORE)) {
-                        const logStore = db.createObjectStore(LOG_STORE, {
-                            keyPath: 'log_id',
-                            autoIncrement: true
-                        });
-                        logStore.createIndex('by_date', 'tanggal_log', { unique: false });
-                    }
-                };
-                req.onsuccess = () => resolve(req.result);
-                req.onerror = () => reject(req.error);
-            });
-        }
-
-        function getTodayDateKey() {
-            const now = new Date();
-            const y = now.getFullYear();
-            const m = String(now.getMonth() + 1).padStart(2, '0');
-            const d = String(now.getDate()).padStart(2, '0');
-            return `${y}-${m}-${d}`;
-        }
-
-        function getFormattedTimeNow() {
-            return new Date().toLocaleTimeString('id-ID', {
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
-            });
-        }
-
-        async function appendDailyScanLog(entry) {
-            try {
-                const db = await openIDB();
-                const firstRec = state.receivingItems[0] || {};
-                const record = {
-                    tanggal_log: entry.tanggal_log || getTodayDateKey(),
-                    waktu: entry.waktu || getFormattedTimeNow(),
-                    timestamp: Date.now(),
-                    kd_store: entry.kd_store || firstRec.kd_store || 'AM024',
-                    aksi: entry.aksi || 'SCAN_BARU',
-                    plu: entry.plu || '-',
-                    barcode: entry.barcode || '-',
-                    descp: entry.descp || 'TANPA DESKRIPSI',
-                    qty_lpb: Number(entry.qty_lpb ?? 0),
-                    qty_sebelum: Number(entry.qty_sebelum ?? 0),
-                    qty_sesudah: Number(entry.qty_sesudah ?? 0),
-                    status_validasi: entry.status_validasi || '-'
-                };
-
-                await new Promise((resolve, reject) => {
-                    const tx = db.transaction(LOG_STORE, 'readwrite');
-                    tx.objectStore(LOG_STORE).add(record);
-                    tx.oncomplete = () => resolve(true);
-                    tx.onerror = () => reject(tx.error);
-                });
-
-                const filterInput = document.getElementById('logDateFilter');
-                if (filterInput && filterInput.value === record.tanggal_log) {
-                    await renderDailyScanLogs(record.tanggal_log);
-                }
-            } catch (e) {
-                console.warn('Gagal menyimpan log harian:', e);
+        function getDeviceId() {
+            if (!window._deviceId) {
+                window._deviceId = 'dev_' + Math.random().toString(36).substring(2, 10);
             }
+            return window._deviceId;
         }
 
-        async function getDailyScanLogsByDate(dateKey) {
-            try {
-                const db = await openIDB();
-                return await new Promise((resolve, reject) => {
-                    const tx = db.transaction(LOG_STORE, 'readonly');
-                    const idx = tx.objectStore(LOG_STORE).index('by_date');
-                    const req = idx.getAll(IDBKeyRange.only(dateKey));
-                    req.onsuccess = () => {
-                        const rows = (req.result || []).sort((a, b) => b.timestamp - a.timestamp);
-                        resolve(rows);
-                    };
-                    req.onerror = () => reject(req.error);
-                });
-            } catch (e) {
-                console.warn('Gagal membaca log harian:', e);
-                return [];
-            }
+        function getCurrentOperatorName() {
+            return (state.operator && state.operator.name) ? state.operator.name : 'PENGINPUT-1';
         }
 
-        async function clearLogsForSelectedDate() {
-            const dateInput = document.getElementById('logDateFilter');
-            const targetDate = (dateInput && dateInput.value) ? dateInput.value : getTodayDateKey();
-            try {
-                const db = await openIDB();
-                await new Promise((resolve, reject) => {
-                    const tx = db.transaction(LOG_STORE, 'readwrite');
-                    const store = tx.objectStore(LOG_STORE);
-                    const idx = store.index('by_date');
-                    const req = idx.openCursor(IDBKeyRange.only(targetDate));
-                    req.onsuccess = (e) => {
-                        const cursor = e.target.result;
-                        if (cursor) {
-                            cursor.delete();
-                            cursor.continue();
-                        }
-                    };
-                    tx.oncomplete = () => resolve(true);
-                    tx.onerror = () => reject(tx.error);
-                });
-                await renderDailyScanLogs(targetDate);
-                showToast(`Riwayat log tanggal ${targetDate} berhasil dibersihkan.`, 'info');
-            } catch (e) {
-                showToast('Gagal membersihkan riwayat log.', 'error');
-            }
-        }
-
-        async function exportDailyScanLogsToCSV() {
-            const dateInput = document.getElementById('logDateFilter');
-            const selectedDate = (dateInput && dateInput.value) ? dateInput.value : getTodayDateKey();
-            const logs = await getDailyScanLogsByDate(selectedDate);
-
-            if (!logs || logs.length === 0) {
-                showToast(`Riwayat log aktivitas scan pada tanggal ${selectedDate} masih kosong.`, 'warning');
-                return;
-            }
-
-            const chronologicalLogs = [...logs].sort((a, b) => a.timestamp - b.timestamp);
-            const firstRec = state.receivingItems[0] || {};
-            const storeCode = chronologicalLogs[0].kd_store || firstRec.kd_store || 'AM024';
-
-            const headers = [
-                'No',
-                'Tanggal Log',
-                'Waktu',
-                'Kode Store',
-                'Aksi',
-                'PLU',
-                'Barcode',
-                'Nama Produk',
-                'Qty LPB',
-                'Qty Sebelum',
-                'Qty Sesudah',
-                'Selisih Perubahan',
-                'Status Validasi'
-            ];
-
-            const escapeCsvCell = (val) => {
-                const str = String(val ?? '');
-                return `"${str.replace(/"/g, '""')}"`;
-            };
-
-            const csvLines = [headers.map(escapeCsvCell).join(',')];
-
-            chronologicalLogs.forEach((log, idx) => {
-                const qtySebelum = Number(log.qty_sebelum ?? 0);
-                const qtySesudah = Number(log.qty_sesudah ?? 0);
-                const selisihPerubahan = log.aksi === 'SCAN_ABAIKAN' ? 0 : (qtySesudah - qtySebelum);
-
-                const rowValues = [
-                    idx + 1,
-                    log.tanggal_log || selectedDate,
-                    log.waktu || '-',
-                    log.kd_store || storeCode,
-                    log.aksi || '-',
-                    log.plu || '-',
-                    log.barcode || '-',
-                    log.descp || '-',
-                    Number(log.qty_lpb ?? 0),
-                    qtySebelum,
-                    qtySesudah,
-                    selisihPerubahan,
-                    log.status_validasi || '-'
-                ];
-
-                csvLines.push(rowValues.map(escapeCsvCell).join(','));
-            });
-
-            const csvString = '\uFEFF' + csvLines.join('\r\n');
-            const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
-            const filename = `Log_Scan_Receiving_${storeCode}_${selectedDate}.csv`;
-            triggerDownload(blob, filename);
-            showToast(`Berhasil mengunduh ${filename} (${chronologicalLogs.length} baris log).`, 'success');
-        }
-
-        async function renderDailyScanLogs(dateKey = null) {
-            const filterEl = document.getElementById('logDateFilter');
-            const targetDate = dateKey || (filterEl && filterEl.value) || getTodayDateKey();
-            const listEl = document.getElementById('dailyScanLogList');
-            const countBadge = document.getElementById('dailyLogCountBadge');
-            if (!listEl) return;
-
-            const logs = await getDailyScanLogsByDate(targetDate);
-            if (countBadge) countBadge.textContent = `${logs.length} Log`;
-
-            if (logs.length === 0) {
-                listEl.innerHTML = `
-                    <div class="rounded-xl border border-dashed border-slate-200 bg-slate-50/60 p-5 text-center text-xs text-slate-500">
-                        Belum ada riwayat aktivitas scan pada tanggal <strong>${targetDate}</strong>.
-                    </div>
-                `;
-                return;
-            }
-
-            const aksiStyleMap = {
-                'SCAN_BARU': { label: 'Scan Baru', cls: 'bg-emerald-100 text-emerald-800 border-emerald-200' },
-                'SCAN_TAMBAH': { label: 'Scan Ulang (+)', cls: 'bg-indigo-100 text-indigo-800 border-indigo-200' },
-                'SCAN_ABAIKAN': { label: 'Scan Diabaikan', cls: 'bg-slate-200 text-slate-700 border-slate-300' },
-                'EDIT_MANUAL': { label: 'Edit Manual', cls: 'bg-amber-100 text-amber-800 border-amber-200' },
-                'ITEM_BARU': { label: 'Input Item Baru', cls: 'bg-purple-100 text-purple-800 border-purple-200' }
-            };
-
-            listEl.innerHTML = logs.map(log => {
-                const badge = aksiStyleMap[log.aksi] || { label: log.aksi, cls: 'bg-slate-100 text-slate-700 border-slate-200' };
-                const delta = Number(log.qty_sesudah) - Number(log.qty_sebelum);
-                const changeText = log.aksi === 'SCAN_ABAIKAN'
-                    ? `Tetap ${log.qty_sesudah} (Diabaikan)`
-                    : `${log.qty_sebelum} → ${log.qty_sesudah} (${delta >= 0 ? '+' + delta : delta})`;
-
-                return `
-                    <div class="rounded-xl border border-slate-200 bg-slate-50/50 p-2.5 text-xs flex items-start justify-between gap-2">
-                        <div class="min-w-0 flex-1">
-                            <div class="flex items-center gap-1.5 flex-wrap">
-                                <span class="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded bg-white border border-slate-200 text-slate-700">${log.waktu}</span>
-                                <span class="px-2 py-0.5 rounded text-[10px] font-extrabold border ${badge.cls}">${badge.label}</span>
-                                <span class="font-mono text-[10px] text-slate-500">PLU: ${log.plu} • BC: ${log.barcode}</span>
-                            </div>
-                            <p class="font-bold text-slate-900 truncate mt-1">${log.descp}</p>
-                            <p class="text-[11px] text-slate-600 mt-0.5">
-                                Qty: <strong class="font-mono text-slate-900">${changeText}</strong>
-                                <span class="text-slate-400 mx-1">|</span>
-                                LPB: <span class="font-mono">${log.qty_lpb}</span>
-                                <span class="text-slate-400 mx-1">|</span>
-                                Status: <strong>${log.status_validasi}</strong>
-                            </p>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        async function idbGet(key) {
-            try {
-                const db = await openIDB();
-                return new Promise((resolve, reject) => {
-                    const tx = db.transaction(DB_STORE, 'readonly');
-                    const req = tx.objectStore(DB_STORE).get(key);
-                    req.onsuccess = () => resolve(req.result);
-                    req.onerror = () => reject(req.error);
-                });
-            } catch (e) {
-                console.warn('IDB Get failed:', e);
-                return null;
-            }
-        }
-
-        async function idbSet(key, val) {
-            try {
-                const db = await openIDB();
-                return new Promise((resolve, reject) => {
-                    const tx = db.transaction(DB_STORE, 'readwrite');
-                    const req = tx.objectStore(DB_STORE).put(val, key);
-                    req.onsuccess = () => resolve(true);
-                    req.onerror = () => reject(req.error);
-                });
-            } catch (e) {
-                console.warn('IDB Set failed:', e);
-                return false;
-            }
-        }
-
-        // =========================================================================
-        // 3. STATE APLIKASI & UTILITAS
-        // =========================================================================
         const state = {
+            operator: {
+                name: '',
+                pin: '',
+                sessionCode: 'AM024-L-K26-0001'
+            },
             masterProducts: [],
             receivingItems: [],
             isAuditFinished: false,
@@ -1151,8 +987,11 @@
 
             text.textContent = message;
             banner.classList.remove('hidden');
-            clearTimeout(window._toastTimer);
-            window._toastTimer = setTimeout(hideToast, 3200);
+
+            if (window._toastTimer) clearTimeout(window._toastTimer);
+            window._toastTimer = setTimeout(() => {
+                hideToast();
+            }, 3500);
         }
 
         function hideToast() {
@@ -1170,118 +1009,279 @@
             if (el) el.classList.add('hidden');
         }
 
-        // =========================================================================
-        // 5. PENANGANAN SCAN BARCODE, KONFIRMASI SCAN ULANG & EDIT QTY MANUAL
-        // =========================================================================
-        function processScannedCode(rawCode) {
-            const code = String(rawCode || '').trim();
-            if (!code) return;
+        function getTodayDateKey() {
+            const now = new Date();
+            const y = now.getFullYear();
+            const m = String(now.getMonth() + 1).padStart(2, '0');
+            const d = String(now.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
 
-            const lower = code.toLowerCase();
+        function openReceivingDB() {
+            return new Promise((resolve, reject) => {
+                const req = indexedDB.open('SmartReceivingValidatorDB', 2);
+                req.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains('kv_store')) {
+                        db.createObjectStore('kv_store', { keyPath: 'key' });
+                    }
+                    if (!db.objectStoreNames.contains('daily_scan_logs')) {
+                        const logStore = db.createObjectStore('daily_scan_logs', {
+                            keyPath: 'log_id',
+                            autoIncrement: true
+                        });
+                        logStore.createIndex('by_date', 'tanggal_log', { unique: false });
+                    }
+                };
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => reject(req.error);
+            });
+        }
 
-            const matchedItem = state.receivingItems.find(item =>
-                String(item.barcode || '').trim().toLowerCase() === lower ||
-                String(item.plu || '').trim().toLowerCase() === lower
-            );
-
-            if (matchedItem) {
-                const currentQty = Number(matchedItem.qty_fisik) || 0;
-
-                if (currentQty > 0 || matchedItem.hasBeenScanned) {
-                    playFeedbackTone('baru');
-                    openRescanConfirmModal(matchedItem);
-                    return;
-                }
-
-                matchedItem.qty_fisik = 1;
-                matchedItem.hasBeenScanned = true;
-                state.lastScannedId = matchedItem.uid;
-
-                const statusInfo = getItemValidationStatus(matchedItem);
-                playFeedbackTone(statusInfo.key);
-                saveSessionToIDB();
-                appendDailyScanLog({
-                    aksi: 'SCAN_BARU',
-                    kd_store: matchedItem.kd_store,
-                    plu: matchedItem.plu,
-                    barcode: matchedItem.barcode,
-                    descp: matchedItem.descp,
-                    qty_lpb: matchedItem.qty_rec,
-                    qty_sebelum: 0,
-                    qty_sesudah: 1,
-                    status_validasi: statusInfo.label
+        async function idbGet(key) {
+            try {
+                const db = await openReceivingDB();
+                const tx = db.transaction('kv_store', 'readonly');
+                const req = tx.objectStore('kv_store').get(key);
+                return await new Promise((resolve) => {
+                    req.onsuccess = () => resolve(req.result ? req.result.value : null);
+                    req.onerror = () => resolve(null);
                 });
-                renderAll();
-                showLastScanBanner(matchedItem);
+            } catch (e) {
+                return null;
+            }
+        }
+
+        async function idbSet(key, value) {
+            try {
+                const db = await openReceivingDB();
+                const tx = db.transaction('kv_store', 'readwrite');
+                tx.objectStore('kv_store').put({ key, value });
+                return await new Promise((resolve) => {
+                    tx.oncomplete = () => resolve(true);
+                    tx.onerror = () => resolve(false);
+                });
+            } catch (e) {
+                return false;
+            }
+        }
+
+        async function appendDailyScanLog(entry) {
+            try {
+                const db = await openReceivingDB();
+                const tx = db.transaction('daily_scan_logs', 'readwrite');
+                const store = tx.objectStore('daily_scan_logs');
+                const now = new Date();
+                const record = {
+                    tanggal_log: entry.tanggal_log || getTodayDateKey(),
+                    waktu: entry.waktu || now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+                    timestamp: Date.now(),
+                    operator: getCurrentOperatorName(),
+                    kd_store: entry.kd_store || 'AM024',
+                    aksi: entry.aksi || 'SCAN',
+                    plu: entry.plu || '-',
+                    barcode: entry.barcode || '-',
+                    descp: entry.descp || '-',
+                    qty_lpb: Number(entry.qty_lpb ?? 0),
+                    qty_sebelum: Number(entry.qty_sebelum ?? 0),
+                    qty_sesudah: Number(entry.qty_sesudah ?? 0),
+                    status_validasi: entry.status_validasi || '-'
+                };
+                store.add(record);
+                await new Promise((resolve) => {
+                    tx.oncomplete = () => resolve(record);
+                    tx.onerror = () => resolve(null);
+                });
+                const filterInput = document.getElementById('logDateFilter');
+                await renderDailyScanLogs(filterInput && filterInput.value ? filterInput.value : getTodayDateKey());
+            } catch (e) {
+                console.warn('Gagal menyimpan log harian:', e);
+            }
+        }
+
+        async function getLogsByDate(dateKey) {
+            try {
+                const db = await openReceivingDB();
+                const tx = db.transaction('daily_scan_logs', 'readonly');
+                const index = tx.objectStore('daily_scan_logs').index('by_date');
+                return await new Promise((resolve) => {
+                    const req = index.getAll(IDBKeyRange.only(dateKey));
+                    req.onsuccess = () => {
+                        const rows = (req.result || []).sort((a, b) => b.timestamp - a.timestamp);
+                        resolve(rows);
+                    };
+                    req.onerror = () => resolve([]);
+                });
+            } catch (e) {
+                return [];
+            }
+        }
+
+        async function renderDailyScanLogs(dateKey = null) {
+            const inputEl = document.getElementById('logDateFilter');
+            const targetDate = dateKey || (inputEl && inputEl.value) || getTodayDateKey();
+            if (inputEl && !inputEl.value) inputEl.value = targetDate;
+
+            const logs = await getLogsByDate(targetDate);
+            setTextIfExists('dailyLogCountBadge', `${logs.length} Log`);
+
+            const listEl = document.getElementById('dailyScanLogList');
+            if (!listEl) return;
+
+            if (logs.length === 0) {
+                listEl.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">Belum ada log pekerjaan pada tanggal ${targetDate}.</p>`;
                 return;
             }
 
-            const masterMatch = findInMaster(code);
-            playFeedbackTone('baru');
+            listEl.innerHTML = logs.map(log => {
+                const delta = (Number(log.qty_sesudah) || 0) - (Number(log.qty_sebelum) || 0);
+                const qtyText = log.aksi === 'SCAN_ABAIKAN'
+                    ? 'Diabaikan'
+                    : `${log.qty_sebelum} → ${log.qty_sesudah} (${delta >= 0 ? '+' + delta : delta})`;
 
-            if (masterMatch) {
-                openNewItemModal(code, masterMatch);
-                showToast('Produk ditemukan di Master, tapi tidak ada di LPB!', 'warning');
+                return `
+                    <div class="p-2.5 rounded-xl border border-slate-200/80 bg-slate-50/60 text-xs flex items-start justify-between gap-2">
+                        <div class="min-w-0">
+                            <div class="flex items-center gap-1.5 flex-wrap">
+                                <span class="font-mono text-[10px] px-1.5 py-0.5 rounded bg-white border border-slate-200 text-slate-700">${log.waktu}</span>
+                                <span class="text-[10px] font-bold text-indigo-700">${log.aksi}</span>
+                                <span class="text-[10px] font-semibold text-slate-600">• ${log.operator || '-'}</span>
+                                <span class="font-mono text-[10px] text-slate-500">PLU: ${log.plu}</span>
+                            </div>
+                            <p class="font-semibold text-slate-800 truncate mt-1">${log.descp}</p>
+                            <p class="text-[11px] text-slate-600 mt-0.5">Perubahan: <strong class="font-mono">${qtyText}</strong> • ${log.status_validasi}</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function exportDailyScanLogsToCSV() {
+            const inputEl = document.getElementById('logDateFilter');
+            const targetDate = (inputEl && inputEl.value) || getTodayDateKey();
+            const logs = await getLogsByDate(targetDate);
+            if (!logs.length) {
+                showToast(`Tidak ada log untuk di-export pada ${targetDate}.`, 'warning');
+                return;
+            }
+
+            const firstRec = state.receivingItems[0] || {};
+            const storeCode = firstRec.kd_store || 'AM024';
+            const rows = logs.slice().reverse().map((log, idx) => ({
+                'No': idx + 1,
+                'Tanggal Log': log.tanggal_log,
+                'Waktu': log.waktu,
+                'Kode Store': log.kd_store || storeCode,
+                'Penginput': log.operator || '-',
+                'Aksi': log.aksi,
+                'PLU': log.plu,
+                'Barcode': log.barcode,
+                'Nama Produk': log.descp,
+                'Qty LPB': log.qty_lpb,
+                'Qty Sebelum': log.qty_sebelum,
+                'Qty Sesudah': log.qty_sesudah,
+                'Selisih Perubahan': (Number(log.qty_sesudah) || 0) - (Number(log.qty_sebelum) || 0),
+                'Status Validasi': log.status_validasi
+            }));
+
+            let csv = '';
+            if (typeof XLSX !== 'undefined') {
+                const ws = XLSX.utils.json_to_sheet(rows);
+                csv = XLSX.utils.sheet_to_csv(ws);
             } else {
-                openNewItemModal(code, null);
-                showToast('Barcode tidak terdaftar di LPB maupun Master!', 'warning');
+                const headers = Object.keys(rows[0]);
+                const esc = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+                csv = [headers.map(esc).join(','), ...rows.map(r => headers.map(h => esc(r[h])).join(','))].join('\r\n');
+            }
+
+            const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+            triggerDownload(blob, `Log_Scan_Receiving_${storeCode}_${targetDate}.csv`);
+            showToast(`Log harian ${targetDate} berhasil di-export ke CSV.`, 'success');
+        }
+
+        async function clearLogsForSelectedDate() {
+            const inputEl = document.getElementById('logDateFilter');
+            const targetDate = (inputEl && inputEl.value) || getTodayDateKey();
+            try {
+                const db = await openReceivingDB();
+                const tx = db.transaction('daily_scan_logs', 'readwrite');
+                const store = tx.objectStore('daily_scan_logs');
+                const index = store.index('by_date');
+                const req = index.getAllKeys(IDBKeyRange.only(targetDate));
+                req.onsuccess = () => {
+                    (req.result || []).forEach(key => store.delete(key));
+                };
+                await new Promise((resolve) => {
+                    tx.oncomplete = () => resolve(true);
+                    tx.onerror = () => resolve(false);
+                });
+                await renderDailyScanLogs(targetDate);
+                showToast(`Log tanggal ${targetDate} dibersihkan.`, 'info');
+            } catch (e) {
+                showToast('Gagal membersihkan log.', 'error');
             }
         }
 
-        function openRescanConfirmModal(item) {
+        function openRescanModal(item) {
             state.pendingRescanItem = item;
-            document.getElementById('rescanProdName').textContent = item.descp;
-            document.getElementById('rescanProdMeta').textContent = `PLU: ${item.plu || '-'} • Barcode: ${item.barcode || '-'} • LPB: ${item.qty_rec}`;
-            document.getElementById('rescanCurrentQty').textContent = `${item.qty_fisik || 0} ${item.sat1}`;
+            setTextIfExists('rescanProdName', item.descp);
+            setTextIfExists('rescanProdMeta', `Barcode: ${item.barcode || '-'} | PLU: ${item.plu || '-'} | LPB: ${item.qty_rec}`);
+            setTextIfExists('rescanCurrentQty', `${item.qty_fisik} ${item.sat1}`);
 
             const addInput = document.getElementById('rescanAddQtyInput');
-            addInput.value = 1;
+            if (addInput) {
+                addInput.value = '1';
+                setTimeout(() => {
+                    addInput.focus();
+                    addInput.select();
+                }, 60);
+            }
 
             const crtBtn = document.getElementById('rescanAddCartonBtn');
-            if (item.isi2 > 1) {
-                crtBtn.textContent = `+1 ${item.sat2 || 'CRT'} (${item.isi2})`;
-                crtBtn.onclick = () => {
-                    addInput.value = item.isi2;
-                    addInput.focus();
-                };
-                crtBtn.classList.remove('hidden');
-            } else {
-                crtBtn.classList.add('hidden');
+            if (crtBtn) {
+                if (item.isi2 > 1) {
+                    crtBtn.classList.remove('hidden');
+                    crtBtn.textContent = `+1 ${item.sat2 || 'CRT'} (${item.isi2})`;
+                    crtBtn.onclick = () => {
+                        if (addInput) addInput.value = String((parseInt(addInput.value, 10) || 0) + item.isi2);
+                    };
+                } else {
+                    crtBtn.classList.add('hidden');
+                }
             }
 
             openModal('rescanConfirmModal');
-            setTimeout(() => {
-                addInput.focus();
-                addInput.select();
-            }, 80);
         }
 
         function stepRescanAddQty(delta) {
-            const input = document.getElementById('rescanAddQtyInput');
-            const nextVal = Math.max(1, (parseInt(input.value, 10) || 1) + delta);
-            input.value = nextVal;
+            const addInput = document.getElementById('rescanAddQtyInput');
+            if (!addInput) return;
+            const nextVal = Math.max(1, (parseInt(addInput.value, 10) || 1) + delta);
+            addInput.value = String(nextVal);
         }
 
         async function confirmRescanAddQty() {
             const item = state.pendingRescanItem;
-            if (!item) {
-                closeModal('rescanConfirmModal');
-                return;
-            }
-
             const addInput = document.getElementById('rescanAddQtyInput');
-            const addQty = Math.max(1, parseInt(addInput.value, 10) || 1);
+            const addQty = Math.max(1, parseInt(addInput ? addInput.value : '1', 10) || 1);
+            state.pendingRescanItem = null;
+            closeModal('rescanConfirmModal');
+            if (!item) return;
+
+            const opName = getCurrentOperatorName();
             const qtySebelum = Number(item.qty_fisik) || 0;
             const qtySesudah = qtySebelum + addQty;
 
             item.qty_fisik = qtySesudah;
+            if (!item.qtyFinalLocked) {
+                item.qty_final = qtySesudah;
+            }
             item.hasBeenScanned = true;
+            item.lastUpdatedBy = opName;
             state.lastScannedId = item.uid;
-            state.pendingRescanItem = null;
 
             const st = getItemValidationStatus(item);
             playFeedbackTone(st.key);
-            closeModal('rescanConfirmModal');
             await saveSessionToIDB();
             await appendDailyScanLog({
                 aksi: 'SCAN_TAMBAH',
@@ -1292,11 +1292,11 @@
                 qty_lpb: item.qty_rec,
                 qty_sebelum: qtySebelum,
                 qty_sesudah: qtySesudah,
-                status_validasi: st.label
+                status_validasi: `${st.label} (Oleh: ${opName})`
             });
             renderAll();
             showLastScanBanner(item);
-            showToast(`Ditambahkan +${addQty} ${item.sat1} ke ${item.descp}`, 'success');
+            showToast(`+${addQty} ${item.sat1} ditambahkan ke "${item.descp}".`, 'success');
         }
 
         async function ignoreRescanItem() {
@@ -1305,6 +1305,7 @@
             closeModal('rescanConfirmModal');
 
             if (item) {
+                const opName = getCurrentOperatorName();
                 const curQty = Number(item.qty_fisik) || 0;
                 const st = getItemValidationStatus(item);
                 await appendDailyScanLog({
@@ -1316,9 +1317,143 @@
                     qty_lpb: item.qty_rec,
                     qty_sebelum: curQty,
                     qty_sesudah: curQty,
-                    status_validasi: st.label
+                    status_validasi: `${st.label} (Oleh: ${opName})`
                 });
-                showToast(`Scan ulang "${item.descp}" diabaikan.`, 'info');
+                showToast(`Scan ulang "${item.descp}" diabaikan oleh ${opName}.`, 'info');
+            }
+        }
+
+        async function processScannedCode(rawCode) {
+            const code = String(rawCode || '').trim();
+            if (!code) return;
+
+            const lower = code.toLowerCase();
+            const opName = getCurrentOperatorName();
+
+            // Cari kecocokan pada daftar penerimaan (LPB / Item Baru)
+            const matchedItem = state.receivingItems.find(it =>
+                String(it.barcode || '').trim().toLowerCase() === lower ||
+                String(it.plu || '').trim().toLowerCase() === lower
+            );
+
+            if (matchedItem) {
+                state.lastScannedId = matchedItem.uid;
+                const curQty = Number(matchedItem.qty_fisik) || 0;
+
+                // Jika produk sudah pernah di-scan sebelumnya, konfirmasi penambahan manual atau abaikan
+                if (matchedItem.hasBeenScanned || curQty > 0) {
+                    playFeedbackTone('warning');
+                    openRescanModal(matchedItem);
+                    return;
+                }
+
+                // Scan pertama kali: tandai sudah di-scan di state internal, namun tetap 0 di input untuk personil umum
+                matchedItem.hasBeenScanned = true;
+                matchedItem.qty_fisik = 0;
+                if (!matchedItem.qtyFinalLocked) {
+                    matchedItem.qty_final = 0;
+                }
+                matchedItem.lastUpdatedBy = opName;
+
+                const st = getItemValidationStatus(matchedItem);
+                playFeedbackTone('sesuai');
+                await saveSessionToIDB();
+                await appendDailyScanLog({
+                    aksi: 'SCAN_BARU',
+                    kd_store: matchedItem.kd_store,
+                    plu: matchedItem.plu,
+                    barcode: matchedItem.barcode,
+                    descp: matchedItem.descp,
+                    qty_lpb: matchedItem.qty_rec,
+                    qty_sebelum: curQty,
+                    qty_sesudah: 0,
+                    status_validasi: `${st.label} (Scan #1 • Oleh: ${opName})`
+                });
+                renderAll();
+                showLastScanBanner(matchedItem);
+                showToast(`Produk "${matchedItem.descp}" terdeteksi (Scan #1, Qty tetap 0 — silakan input manual).`, 'info');
+                return;
+            }
+
+            // Tidak ada di LPB -> cek di Master Produk lalu buka form Item Baru
+            const masterMatch = findInMaster(code);
+            playFeedbackTone('baru');
+            openNewItemModal(code, masterMatch);
+            showToast(masterMatch
+                ? `Item ditemukan di Master (${masterMatch.descp}), belum ada di LPB.`
+                : `Barcode "${code}" belum terdaftar di LPB maupun Master.`, 'warning');
+        }
+
+        async function syncFromGithub(silent = false) {
+            const syncIcon = document.getElementById('syncIcon');
+            if (syncIcon) syncIcon.classList.add('fa-spin');
+
+            try {
+                const rawMasterUrl = normalizeGithubRawUrl(state.masterUrl || DEFAULT_MASTER_URL);
+                const rawReceivedUrl = normalizeGithubRawUrl(state.receivedUrl || DEFAULT_RECEIVED_URL);
+
+                const [masterRes, receivedRes] = await Promise.all([
+                    fetch(rawMasterUrl, { cache: 'no-store' }),
+                    fetch(rawReceivedUrl, { cache: 'no-store' })
+                ]);
+
+                if (!masterRes.ok || !receivedRes.ok) {
+                    throw new Error(`HTTP ${masterRes.status}/${receivedRes.status}`);
+                }
+
+                const [masterJson, receivedJson] = await Promise.all([
+                    masterRes.json(),
+                    receivedRes.json()
+                ]);
+
+                const masterArr = extractArrayPayload(masterJson);
+                const receivedArr = extractArrayPayload(receivedJson);
+
+                if (masterArr.length > 0) {
+                    state.masterProducts = masterArr;
+                }
+
+                if (receivedArr.length > 0) {
+                    const existingProgress = new Map();
+                    state.receivingItems.forEach(it => {
+                        if (!it.isNewItem) {
+                            const key = `${it.plu || ''}|${it.barcode || ''}`.toLowerCase();
+                            existingProgress.set(key, it);
+                        }
+                    });
+
+                    const newItems = state.receivingItems.filter(it => it.isNewItem);
+                    const rebuilt = buildReceivingSession(receivedArr, state.masterProducts).map(item => {
+                        const key = `${item.plu || ''}|${item.barcode || ''}`.toLowerCase();
+                        const prev = existingProgress.get(key);
+                        if (prev) {
+                            return {
+                                ...item,
+                                qty_fisik: prev.qty_fisik ?? 0,
+                                qty_final: prev.qty_final ?? (prev.qty_fisik ?? 0),
+                                qtyFinalLocked: Boolean(prev.qtyFinalLocked),
+                                hasBeenScanned: Boolean(prev.hasBeenScanned),
+                                lastUpdatedBy: prev.lastUpdatedBy || '-'
+                            };
+                        }
+                        return item;
+                    });
+
+                    state.receivingItems = [...newItems, ...rebuilt];
+                }
+
+                await saveSessionToIDB();
+                renderAll();
+                if (!silent) {
+                    showToast(`Sinkronisasi GitHub berhasil (${state.masterProducts.length} Master, ${state.receivingItems.length} Item).`, 'success');
+                }
+            } catch (err) {
+                console.warn('Sync GitHub gagal, memakai cache lokal:', err);
+                if (!silent) {
+                    showToast('Gagal sinkronisasi GitHub (offline/jaringan). Data lokal tetap aktif.', 'warning');
+                }
+            } finally {
+                if (syncIcon) syncIcon.classList.remove('fa-spin');
             }
         }
 
@@ -1326,12 +1461,17 @@
             const item = state.receivingItems.find(i => i.uid === uid);
             if (!item) return;
 
+            const opName = getCurrentOperatorName();
             const qtySebelum = Number(item.qty_fisik) || 0;
             const nextVal = Math.max(0, qtySebelum + delta);
             if (nextVal === qtySebelum) return;
 
             item.qty_fisik = nextVal;
-            if (nextVal > 0) item.hasBeenScanned = true;
+            if (!item.qtyFinalLocked) {
+                item.qty_final = nextVal;
+            }
+            item.hasBeenScanned = true;
+            item.lastUpdatedBy = opName;
             state.lastScannedId = item.uid;
 
             const st = getItemValidationStatus(item);
@@ -1346,7 +1486,7 @@
                 qty_lpb: item.qty_rec,
                 qty_sebelum: qtySebelum,
                 qty_sesudah: nextVal,
-                status_validasi: st.label
+                status_validasi: `${st.label} (Oleh: ${opName})`
             });
             renderAll();
             showLastScanBanner(item);
@@ -1356,9 +1496,14 @@
             const item = state.receivingItems.find(i => i.uid === uid);
             if (!item) return;
 
+            const opName = getCurrentOperatorName();
             const parsed = rawVal === '' ? 0 : Math.max(0, parseInt(rawVal, 10) || 0);
             item.qty_fisik = parsed;
-            if (parsed > 0) item.hasBeenScanned = true;
+            if (!item.qtyFinalLocked) {
+                item.qty_final = parsed;
+            }
+            item.hasBeenScanned = true;
+            item.lastUpdatedBy = opName;
             state.lastScannedId = item.uid;
 
             const st = getItemValidationStatus(item);
@@ -1372,11 +1517,16 @@
                 }
                 const diffEl = cardEl.querySelector('[data-diff-label]');
                 if (diffEl) {
-                    const diff = parsed - (Number(item.qty_rec) || 0);
+                    const effectiveQty = item.qtyFinalLocked ? Number(item.qty_final) : parsed;
+                    const diff = effectiveQty - (Number(item.qty_rec) || 0);
                     diffEl.className = `font-mono font-bold ${st.qtyColor}`;
                     diffEl.textContent = item.isNewItem
-                        ? `+${parsed} (Baru)`
+                        ? `+${effectiveQty} (Baru)`
                         : (diff === 0 ? 'Pas (0)' : (diff > 0 ? `+${diff}` : `${diff}`));
+                }
+                const finalDisplay = cardEl.querySelector('[data-final-qty-display]');
+                if (finalDisplay && !item.qtyFinalLocked) {
+                    finalDisplay.textContent = `${parsed} ${item.sat1}`;
                 }
                 inputEl.className = `w-14 h-8 text-center font-mono text-xs sm:text-sm font-extrabold ${st.qtyColor} focus:outline-none focus:bg-indigo-50/40`;
             }
@@ -1389,10 +1539,15 @@
             const item = state.receivingItems.find(i => i.uid === uid);
             if (!item) return;
 
+            const opName = getCurrentOperatorName();
             const prevSnapshot = parseInt(inputEl.dataset.prevQty ?? '0', 10) || 0;
             const currentQty = Math.max(0, parseInt(inputEl.value, 10) || 0);
             inputEl.value = currentQty;
             item.qty_fisik = currentQty;
+            if (!item.qtyFinalLocked) {
+                item.qty_final = currentQty;
+            }
+            item.lastUpdatedBy = opName;
 
             if (currentQty !== prevSnapshot) {
                 inputEl.dataset.prevQty = String(currentQty);
@@ -1406,13 +1561,64 @@
                     qty_lpb: item.qty_rec,
                     qty_sebelum: prevSnapshot,
                     qty_sesudah: currentQty,
-                    status_validasi: st.label
+                    status_validasi: `${st.label} (Oleh: ${opName})`
                 });
                 showLastScanBanner(item);
             }
 
             saveSessionToIDB();
             renderAll();
+        }
+
+        function setFixQtyFinal(uid) {
+            const item = state.receivingItems.find(i => i.uid === uid);
+            if (!item) return;
+
+            const opName = getCurrentOperatorName();
+            const currentPhys = Number(item.qty_fisik) || 0;
+            const prevFinal = Number(item.qty_final) || 0;
+
+            if (!item.qtyFinalLocked) {
+                item.qty_final = currentPhys;
+                item.qtyFinalLocked = true;
+                item.lastUpdatedBy = opName;
+                showToast(`Qty Final dikunci = ${currentPhys} ${item.sat1} oleh ${opName}.`, 'success');
+                appendDailyScanLog({
+                    aksi: 'KUNCI_QTY_FINAL',
+                    kd_store: item.kd_store,
+                    plu: item.plu,
+                    barcode: item.barcode,
+                    descp: item.descp,
+                    qty_lpb: item.qty_rec,
+                    qty_sebelum: prevFinal,
+                    qty_sesudah: item.qty_final,
+                    status_validasi: `Qty Fix Dikunci (${opName})`
+                });
+            } else {
+                item.qtyFinalLocked = false;
+                item.lastUpdatedBy = opName;
+                showToast('Kunci Qty Final dibuka kembali.', 'info');
+            }
+
+            saveSessionToIDB();
+            renderAll();
+        }
+
+        function openOperatorLoginModal() {
+            const nameEl = document.getElementById('operatorNameInput');
+            const pinEl = document.getElementById('operatorPinInput');
+            const sessEl = document.getElementById('sharedSessionCodeInput');
+            if (nameEl) nameEl.value = (state.operator && state.operator.name) || '';
+            if (pinEl) pinEl.value = (state.operator && state.operator.pin) || '';
+            if (sessEl) {
+                const firstRec = state.receivingItems[0] || {};
+                const defaultSess = `${firstRec.kd_store || 'AM024'}-${firstRec.no_lpb || 'LPB'}`;
+                sessEl.value = (state.operator && state.operator.sessionCode) || defaultSess;
+            }
+            openModal('operatorLoginModal');
+            setTimeout(() => {
+                if (nameEl) nameEl.focus();
+            }, 60);
         }
 
         function removeNewItem(uid) {
@@ -1708,6 +1914,7 @@
 
         function renderAll() {
             const firstRec = state.receivingItems[0];
+            setTextIfExists('operatorNameLabel', getCurrentOperatorName());
             if (firstRec) {
                 setTextIfExists('storeCodeBadge', firstRec.kd_store || 'STORE');
                 setTextIfExists('lpbSubheader', firstRec.no_lpb
@@ -1797,6 +2004,15 @@
                                     <div class="h-6 w-px bg-slate-200"></div>
                                 ` : ''}
                                 <div>
+                                    <span class="text-[10px] text-slate-500 block">Qty Final (Fix)</span>
+                                    <button type="button" onclick="setFixQtyFinal('${item.uid}')" title="Klik untuk mengunci/membuka Qty Final"
+                                            class="inline-flex items-center gap-1 font-mono font-bold ${item.qtyFinalLocked ? 'text-emerald-700 bg-emerald-100/80 px-1.5 py-0.5 rounded' : 'text-indigo-700 hover:underline'}">
+                                        <i class="fas ${item.qtyFinalLocked ? 'fa-lock text-[9px]' : 'fa-lock-open text-[9px] opacity-60'}"></i>
+                                        <span data-final-qty-display>${item.qtyFinalLocked ? item.qty_final : item.qty_fisik} ${item.sat1}</span>
+                                    </button>
+                                </div>
+                                <div class="h-6 w-px bg-slate-200"></div>
+                                <div>
                                     <span class="text-[10px] text-slate-500 block">Selisih</span>
                                     <span data-diff-label class="font-mono font-bold ${st.qtyColor}">${diffLabel}</span>
                                 </div>
@@ -1835,80 +2051,25 @@
         }
 
         // =========================================================================
-        // 8. SINKRONISASI GITHUB & PENYIMPANAN SESI INDEXEDDB
+        // 8. SINKRONISASI GITHUB, REAL-TIME MULTI-PERANGKAT & INDEXEDDB
         // =========================================================================
         async function saveSessionToIDB() {
-            await idbSet('receivingSession', {
+            const payload = {
+                operator: state.operator,
                 masterProducts: state.masterProducts,
                 receivingItems: state.receivingItems,
                 isAuditFinished: state.isAuditFinished,
                 masterUrl: state.masterUrl,
                 receivedUrl: state.receivedUrl,
                 updatedAt: Date.now()
-            });
-        }
-
-        async function syncFromGithub(silent = false) {
-            const syncIcon = document.getElementById('syncIcon');
-            if (syncIcon) syncIcon.classList.add('fa-spin');
-
-            const rawMasterUrl = normalizeGithubRawUrl(state.masterUrl);
-            const rawReceivedUrl = normalizeGithubRawUrl(state.receivedUrl);
-
-            try {
-                const [resMaster, resReceived] = await Promise.all([
-                    fetch(rawMasterUrl, { cache: 'no-store' }),
-                    fetch(rawReceivedUrl, { cache: 'no-store' })
-                ]);
-
-                if (!resMaster.ok || !resReceived.ok) {
-                    throw new Error(`HTTP Error (${resMaster.status} / ${resReceived.status})`);
-                }
-
-                const [jsonMaster, jsonReceived] = await Promise.all([
-                    resMaster.json(),
-                    resReceived.json()
-                ]);
-
-                const masterArr = extractArrayPayload(jsonMaster);
-                const receivedArr = extractArrayPayload(jsonReceived);
-
-                if (receivedArr.length === 0) {
-                    throw new Error('Data received.json kosong.');
-                }
-
-                const prevQtyMap = new Map();
-                state.receivingItems.forEach(old => {
-                    if (!old.isNewItem && old.qty_fisik > 0) {
-                        prevQtyMap.set(`${old.plu}_${old.barcode}`, old.qty_fisik);
-                    }
+            };
+            await idbSet('receivingSession', payload);
+            if (window.realtimeSyncEngine && state.operator && state.operator.sessionCode) {
+                window.realtimeSyncEngine.pushSessionState(state.operator.sessionCode, {
+                    receivingItems: state.receivingItems,
+                    isAuditFinished: state.isAuditFinished,
+                    updatedAt: payload.updatedAt
                 });
-                const existingNewItems = state.receivingItems.filter(i => i.isNewItem);
-
-                state.masterProducts = masterArr;
-                const rebuilt = buildReceivingSession(receivedArr, masterArr);
-                rebuilt.forEach(item => {
-                    const savedQty = prevQtyMap.get(`${item.plu}_${item.barcode}`);
-                    if (savedQty !== undefined) {
-                        item.qty_fisik = savedQty;
-                        item.hasBeenScanned = true;
-                    }
-                });
-
-                state.receivingItems = [...rebuilt, ...existingNewItems];
-                await saveSessionToIDB();
-                renderAll();
-
-                if (!silent) {
-                    showToast(`Sinkronisasi GitHub berhasil (${rebuilt.length} item LPB, ${masterArr.length} Master).`, 'success');
-                }
-            } catch (err) {
-                console.warn('GitHub fetch failed, using IDB/fallback:', err);
-                if (!silent) {
-                    showToast('Gagal terhubung ke GitHub. Menggunakan data cache offline.', 'warning');
-                }
-            } finally {
-                if (syncIcon) syncIcon.classList.remove('fa-spin');
             }
         }
 
@@ -2019,6 +2180,7 @@
 
             const savedSession = await idbGet('receivingSession');
             if (savedSession && Array.isArray(savedSession.receivingItems) && savedSession.receivingItems.length > 0) {
+                if (savedSession.operator) state.operator = savedSession.operator;
                 state.masterProducts = savedSession.masterProducts || FALLBACK_MASTER;
                 state.receivingItems = savedSession.receivingItems;
                 state.isAuditFinished = Boolean(savedSession.isAuditFinished);
@@ -2033,18 +2195,57 @@
                 if (navigator.onLine) await syncFromGithub(true);
             }
 
-            const masterUrlEl = document.getElementById('masterUrlInput');
-            const receivedUrlEl = document.getElementById('receivedUrlInput');
-            if (masterUrlEl) masterUrlEl.value = state.masterUrl;
-            if (receivedUrlEl) receivedUrlEl.value = state.receivedUrl;
-
-            const logDateFilter = document.getElementById('logDateFilter');
-            if (logDateFilter) {
-                logDateFilter.value = getTodayDateKey();
-                logDateFilter.addEventListener('change', () => {
-                    renderDailyScanLogs(logDateFilter.value);
+            if (window.realtimeSyncEngine) {
+                window.realtimeSyncEngine.initCloudSync(state.operator.sessionCode, (remoteData) => {
+                    if (Array.isArray(remoteData.receivingItems) && remoteData.receivingItems.length > 0) {
+                        state.receivingItems = remoteData.receivingItems;
+                        if (typeof remoteData.isAuditFinished === 'boolean') {
+                            state.isAuditFinished = remoteData.isAuditFinished;
+                        }
+                        idbSet('receivingSession', {
+                            operator: state.operator,
+                            masterProducts: state.masterProducts,
+                            receivingItems: state.receivingItems,
+                            isAuditFinished: state.isAuditFinished,
+                            masterUrl: state.masterUrl,
+                            receivedUrl: state.receivedUrl,
+                            updatedAt: Date.now()
+                        });
+                        renderAll();
+                        showToast(`Update real-time diterima dari ${remoteData.lastUpdatedByOperator || 'perangkat lain'}.`, 'info');
+                    }
                 });
             }
+
+            if (!state.operator || !state.operator.name) {
+                openOperatorLoginModal();
+            }
+
+            document.getElementById('operatorLoginForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const nameVal = document.getElementById('operatorNameInput').value.trim().toUpperCase();
+                const pinVal = document.getElementById('operatorPinInput').value.trim();
+                const sessVal = document.getElementById('sharedSessionCodeInput').value.trim().toUpperCase() || 'AM024-LPB';
+                if (!nameVal) return;
+
+                state.operator = { name: nameVal, pin: pinVal, sessionCode: sessVal };
+                closeModal('operatorLoginModal');
+                await saveSessionToIDB();
+                if (window.realtimeSyncEngine) {
+                    window.realtimeSyncEngine.subscribeSession(sessVal, (remoteData) => {
+                        if (Array.isArray(remoteData.receivingItems) && remoteData.receivingItems.length > 0) {
+                            state.receivingItems = remoteData.receivingItems;
+                            if (typeof remoteData.isAuditFinished === 'boolean') {
+                                state.isAuditFinished = remoteData.isAuditFinished;
+                            }
+                            renderAll();
+                        }
+                    });
+                }
+                renderAll();
+                showToast(`Selamat bertugas, ${nameVal} (Sesi: ${sessVal})`, 'success');
+            });
+
             await renderDailyScanLogs(getTodayDateKey());
 
             document.getElementById('logoInput').addEventListener('change', (e) => {
@@ -2097,7 +2298,10 @@
                     descp,
                     qty_rec: 0,
                     qty_fisik: qty,
+                    qty_final: qty,
+                    qtyFinalLocked: false,
                     hasBeenScanned: true,
+                    lastUpdatedBy: getCurrentOperatorName(),
                     sat1: satuan,
                     sat2: '',
                     isi2: 0,
@@ -2149,79 +2353,118 @@
                 }
             });
 
-            document.getElementById('finishAuditBtn').addEventListener('click', async () => {
-                state.isAuditFinished = !state.isAuditFinished;
-                await saveSessionToIDB();
-                renderAll();
-                if (state.isAuditFinished) {
-                    showToast('Pengecekan selesai. Item dengan qty 0 ditandai Barang Tidak Ada.', 'warning');
-                } else {
-                    showToast('Sesi pengecekan dibuka kembali.', 'info');
-                }
-            });
-
-            document.getElementById('resetSessionBtn').addEventListener('click', async () => {
-                state.receivingItems = state.receivingItems.filter(i => !i.isNewItem);
-                state.receivingItems.forEach(i => {
-                    i.qty_fisik = 0;
-                    i.hasBeenScanned = false;
+            const finishAuditBtnEl = document.getElementById('finishAuditBtn');
+            if (finishAuditBtnEl) {
+                finishAuditBtnEl.addEventListener('click', async () => {
+                    state.isAuditFinished = !state.isAuditFinished;
+                    await saveSessionToIDB();
+                    renderAll();
+                    if (state.isAuditFinished) {
+                        showToast('Pengecekan selesai. Item dengan qty 0 ditandai Barang Tidak Ada.', 'warning');
+                    } else {
+                        showToast('Sesi pengecekan dibuka kembali.', 'info');
+                    }
                 });
-                state.isAuditFinished = false;
-                const lastCard = document.getElementById('lastScannedCard');
-                if (lastCard) lastCard.classList.add('hidden');
-                await saveSessionToIDB();
-                renderAll();
-                closeModal('settingsModal');
-                showToast('Semua qty fisik telah direset ke 0.', 'info');
-            });
+            }
 
-            document.getElementById('syncGithubBtn').addEventListener('click', () => syncFromGithub(false));
-            document.getElementById('openSettingsBtn').addEventListener('click', () => openModal('settingsModal'));
-            document.getElementById('openExportModalBtn').addEventListener('click', openExportModal);
+            const resetSessionBtnEl = document.getElementById('resetSessionBtn');
+            if (resetSessionBtnEl) {
+                resetSessionBtnEl.addEventListener('click', async () => {
+                    state.receivingItems = state.receivingItems.filter(i => !i.isNewItem);
+                    state.receivingItems.forEach(i => {
+                        i.qty_fisik = 0;
+                        i.qty_final = 0;
+                        i.qtyFinalLocked = false;
+                        i.hasBeenScanned = false;
+                    });
+                    state.isAuditFinished = false;
+                    const lastCard = document.getElementById('lastScannedCard');
+                    if (lastCard) lastCard.classList.add('hidden');
+                    await saveSessionToIDB();
+                    renderAll();
+                    closeModal('settingsModal');
+                    showToast('Semua qty fisik telah direset ke 0.', 'info');
+                });
+            }
 
-            document.getElementById('saveAndSyncUrlBtn').addEventListener('click', async () => {
-                state.masterUrl = document.getElementById('masterUrlInput').value.trim() || DEFAULT_MASTER_URL;
-                state.receivedUrl = document.getElementById('receivedUrlInput').value.trim() || DEFAULT_RECEIVED_URL;
-                closeModal('settingsModal');
-                await syncFromGithub(false);
-            });
+            const syncGithubBtnEl = document.getElementById('syncGithubBtn');
+            if (syncGithubBtnEl) syncGithubBtnEl.addEventListener('click', () => syncFromGithub(false));
 
-            document.getElementById('importMasterFile').addEventListener('change', (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-                const reader = new FileReader();
-                reader.onload = async (ev) => {
-                    try {
-                        const arr = extractArrayPayload(JSON.parse(ev.target.result));
-                        state.masterProducts = arr;
-                        await saveSessionToIDB();
-                        showToast(`Master Produk dimuat (${arr.length} item).`, 'success');
-                    } catch (err) {
-                        showToast('Format file master.json tidak valid.', 'error');
-                    }
-                };
-                reader.readAsText(file);
-            });
+            const openSettingsBtnEl = document.getElementById('openSettingsBtn');
+            if (openSettingsBtnEl) {
+                openSettingsBtnEl.addEventListener('click', () => {
+                    const mInp = document.getElementById('masterUrlInput');
+                    const rInp = document.getElementById('receivedUrlInput');
+                    if (mInp) mInp.value = state.masterUrl || DEFAULT_MASTER_URL;
+                    if (rInp) rInp.value = state.receivedUrl || DEFAULT_RECEIVED_URL;
+                    openModal('settingsModal');
+                });
+            }
 
-            document.getElementById('importReceivedFile').addEventListener('change', (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-                const reader = new FileReader();
-                reader.onload = async (ev) => {
-                    try {
-                        const arr = extractArrayPayload(JSON.parse(ev.target.result));
-                        state.receivingItems = buildReceivingSession(arr, state.masterProducts);
-                        state.isAuditFinished = false;
-                        await saveSessionToIDB();
-                        renderAll();
-                        closeModal('settingsModal');
-                        showToast(`Data LPB dimuat (${arr.length} item).`, 'success');
-                    } catch (err) {
-                        showToast('Format file received.json tidak valid.', 'error');
-                    }
-                };
-                reader.readAsText(file);
-            });
+            const openExportModalBtnEl = document.getElementById('openExportModalBtn');
+            if (openExportModalBtnEl) openExportModalBtnEl.addEventListener('click', openExportModal);
+
+            const saveAndSyncUrlBtnEl = document.getElementById('saveAndSyncUrlBtn');
+            if (saveAndSyncUrlBtnEl) {
+                saveAndSyncUrlBtnEl.addEventListener('click', async () => {
+                    const mInp = document.getElementById('masterUrlInput');
+                    const rInp = document.getElementById('receivedUrlInput');
+                    state.masterUrl = (mInp && mInp.value.trim()) || DEFAULT_MASTER_URL;
+                    state.receivedUrl = (rInp && rInp.value.trim()) || DEFAULT_RECEIVED_URL;
+                    closeModal('settingsModal');
+                    await syncFromGithub(false);
+                });
+            }
+
+            const importMasterFileEl = document.getElementById('importMasterFile');
+            if (importMasterFileEl) {
+                importMasterFileEl.addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = async (ev) => {
+                        try {
+                            const arr = extractArrayPayload(JSON.parse(ev.target.result));
+                            state.masterProducts = arr;
+                            await saveSessionToIDB();
+                            showToast(`Master Produk dimuat (${arr.length} item).`, 'success');
+                        } catch (err) {
+                            showToast('Format file master.json tidak valid.', 'error');
+                        }
+                    };
+                    reader.readAsText(file);
+                });
+            }
+
+            const importReceivedFileEl = document.getElementById('importReceivedFile');
+            if (importReceivedFileEl) {
+                importReceivedFileEl.addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = async (ev) => {
+                        try {
+                            const arr = extractArrayPayload(JSON.parse(ev.target.result));
+                            state.receivingItems = buildReceivingSession(arr, state.masterProducts);
+                            state.isAuditFinished = false;
+                            await saveSessionToIDB();
+                            renderAll();
+                            closeModal('settingsModal');
+                            showToast(`Data LPB dimuat (${arr.length} item).`, 'success');
+                        } catch (err) {
+                            showToast('Format file received.json tidak valid.', 'error');
+                        }
+                    };
+                    reader.readAsText(file);
+                });
+            }
+
+            const logDateFilterEl = document.getElementById('logDateFilter');
+            if (logDateFilterEl) {
+                logDateFilterEl.addEventListener('change', (e) => {
+                    renderDailyScanLogs(e.target.value || getTodayDateKey());
+                });
+            }
 
             function updateNetworkUI() {
                 const badge = document.getElementById('networkBadge');
@@ -2239,5 +2482,48 @@
             updateNetworkUI();
         });
     </script>
+
+    <footer class="social-footer-container">
+        <!-- Row 1: Icon Social Media (Tiduran / Horizontal) -->
+        <div class="social-footer-bar">
+            <a href="https://www.linkedin.com/in/yudi-dwiranto-cs77" target="_blank" rel="noopener noreferrer" class="social-icon linkedin" aria-label="LinkedIn">
+                <i class="fab fa-linkedin-in"></i>
+                <span class="tooltip">LinkedIn</span>
+            </a>
+
+            <a href="https://web.facebook.com/ydwiranto" target="_blank" rel="noopener noreferrer" class="social-icon facebook" aria-label="Facebook">
+                <i class="fab fa-facebook-f"></i>
+                <span class="tooltip">Facebook</span>
+            </a>
+
+            <a href="https://www.instagram.com/yudi_cah_sragen_77/" target="_blank" rel="noopener noreferrer" class="social-icon instagram" aria-label="Instagram">
+                <i class="fab fa-instagram"></i>
+                <span class="tooltip">Instagram</span>
+            </a>
+
+            <a href="https://wa.me/6281389188903?text=Assalamu.alaikum...%20Halo!%20Selamat%20[Pagi,%20Siang,%20Sore]%20Saya%20baru%20saja%20melihat%20web%20aplikasi%20Anda%20dan%20tertarik%20dengan%20solusinya.%20Kalau%20ada%20waktu%20luang,%20boleh%20kita%20mengobrol%20santai%20dulu%20untuk%20melihat%20potensi%20kerja%20sama%20ke%20depan%20?%20Terima%20kasih" target="_blank" rel="noopener noreferrer" class="social-icon whatsapp" aria-label="WhatsApp">
+                <i class="fab fa-whatsapp"></i>
+                <span class="tooltip">WhatsApp</span>
+            </a>
+
+            <a href="https://id.shp.ee/yudmwbm1?fromSource=whatsapp&smtt=0.0.3" target="_blank" rel="noopener noreferrer" class="social-icon shopee" aria-label="Shopee">
+                <i class="fas fa-shopping-bag"></i>
+                <span class="tooltip">Shopee</span>
+            </a>
+
+            <a href="https://www.tiktok.com/@selarasdirumah" target="_blank" rel="noopener noreferrer" class="social-icon tiktok" aria-label="TikTok">
+                <i class="fab fa-tiktok"></i>
+                <span class="tooltip">TikTok</span>
+            </a>
+        </div>
+
+        <!-- Kolaborator & Hak Cipta -->
+        <div class="footer-credits">
+            Handcrafted with ❤️ by <strong>Andrew Dwiranto</strong> (Cah_Sragen_77, Indonesia)
+            <div class="mt-1.5">
+                © 2026 Hak Cipta Dilindungi Undang-Undang
+            </div>
+        </div>
+    </footer>
 </body>
 </html>
