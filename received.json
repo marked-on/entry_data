@@ -1,31 +1,4 @@
-[
-  {
-    "kd_store": "AM011",
-    "nama_store": null,
-    "inisial": null,
-    "status": null,
-    "kd_supp": "DCA01",
-    "nama_supp": "DISTRIBUTION CENTER BANDUNG",
-    "status_supp": "NPKP",
-    "faktur": "T-K26-01141",
-    "faktur_do": null,
-    "no_lpb": "AM011-K26-0091",
-    "tgl_faktur": "November 26, 2026",
-    "tgl_tiba": "November 26, 2026",
-    "tgl_bayar": "November 26, 2026",
-    "plu": "3011012",
-    "barcode": "80001",
-    "descp": "TELUR AYAM NEGERI GR",
-    "status_prod": "NBKP",
-    "qty_rec": "600,000",
-    "cost": "22.37",
-    "total_cost": "13,422,000",
-    "discount": "0",
-    "total_nbkp": "13,422,000",
-    "total_bkp": "0",
-    "ppn": "0",
-    "total_faktur": "13,422,000",
-    "keterangan": "TRF OUT DC"
+
   },
   {
     "kd_store": "AM024",
